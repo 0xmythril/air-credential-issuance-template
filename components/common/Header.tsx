@@ -14,11 +14,14 @@ import Link from "next/link";
 import { useDisconnect } from "wagmi";
 import { useAirkit } from "../../lib/hooks/useAirkit";
 import { useSession } from "../../lib/hooks/useSession";
+import { useAirProvider } from "../../lib/hooks/useAirProvider";
 import { env } from "@/lib/env";
+import { LogOut } from "lucide-react";
 
 export const Header = () => {
   const { accessToken, setAccessToken } = useSession();
   const { airService } = useAirkit();
+  const airProvider = useAirProvider();
   const { disconnect: wagmiDisconnect } = useDisconnect();
   const isWalletLogin = env.NEXT_PUBLIC_AUTH_METHOD === "wallet";
   const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
@@ -33,6 +36,21 @@ export const Header = () => {
       }
     }
     setAccessToken(null);
+  };
+
+  const logoutAirServices = async () => {
+    try {
+      if (airProvider.isLoggedIn) {
+        await airService.logout();
+        // Only logout from AIR Services, don't clear the access token
+        // This preserves the wallet connection and session
+        
+        // Force a small delay to allow state to update
+        await new Promise(resolve => setTimeout(resolve, 100));
+      }
+    } catch (error) {
+      console.error("Failed to logout from AIR Services:", error);
+    }
   };
 
   return (
@@ -50,35 +68,50 @@ export const Header = () => {
             className={`h-7 w-auto ml-4 dark:invert dark:grayscale`}
           />
         </Link>
-        {accessToken && (
-          <Dialog>
-            <DialogTrigger asChild>
-              <Button variant="outline" size="sm" className="mr-4">
-                {String(getNameFromAccessToken(accessToken))}
-              </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[300px]">
-              <DialogHeader>
-                <DialogTitle>Account</DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">Address</p>
-                  <p className="font-mono text-sm">
-                    {String(getNameFromAccessToken(accessToken))}
-                  </p>
-                </div>
-                <Button
-                  variant="destructive"
-                  onClick={() => logout()}
-                  className="w-full"
-                >
-                  Logout
+        <div className="flex items-center gap-2 mr-4">
+          {accessToken && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button variant="outline" size="sm">
+                  {String(getNameFromAccessToken(accessToken))}
                 </Button>
-              </div>
-            </DialogContent>
-          </Dialog>
-        )}
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[300px]">
+                <DialogHeader>
+                  <DialogTitle>Account</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Address</p>
+                    <p className="font-mono text-sm">
+                      {String(getNameFromAccessToken(accessToken))}
+                    </p>
+                  </div>
+                  <Button
+                    variant="destructive"
+                    onClick={() => logout()}
+                    className="w-full"
+                  >
+                    Logout
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          )}
+          
+          {airProvider.isLoggedIn && airProvider.userEmail && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={logoutAirServices}
+              className="flex items-center gap-2"
+              title={`AIR User: ${airProvider.userEmail}, Connected=${airProvider.isConnected}, Address=${airProvider.address}`}
+            >
+              <LogOut className="h-4 w-4" />
+              {airProvider.userEmail}
+            </Button>
+          )}
+        </div>
       </div>
     </header>
   );

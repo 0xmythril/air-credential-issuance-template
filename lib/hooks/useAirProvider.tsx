@@ -6,6 +6,8 @@ interface AirProviderInfo {
   chainId: string | null;
   isConnected: boolean;
   isInitialized: boolean;
+  isLoggedIn: boolean;
+  userEmail: string | null;
 }
 
 /**
@@ -16,13 +18,20 @@ export const useAirProvider = (): AirProviderInfo => {
   const { airService, isInitialized } = useAirkit();
   const [address, setAddress] = useState<string | null>(null);
   const [chainId, setChainId] = useState<string | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isInitialized || !airService) {
       setAddress(null);
       setChainId(null);
+      setIsLoggedIn(false);
+      setUserEmail(null);
       return;
     }
+
+    // Update login state
+    setIsLoggedIn(airService.isLoggedIn);
 
     let provider: any = null;
     let handleAccountsChanged: ((accounts: string[]) => void) | null = null;
@@ -100,10 +109,43 @@ export const useAirProvider = (): AirProviderInfo => {
     };
   }, [isInitialized, airService]);
 
+  // Separate effect to monitor login state changes and fetch user info
+  useEffect(() => {
+    if (!isInitialized || !airService) return;
+
+    const checkLoginStateAndUserInfo = async () => {
+      const isLoggedInNow = airService.isLoggedIn;
+      setIsLoggedIn(isLoggedInNow);
+
+      if (isLoggedInNow) {
+        try {
+          const userInfo = await airService.getUserInfo();
+          const email = userInfo?.user?.email || null;
+          setUserEmail(email);
+        } catch (error) {
+          console.error("Failed to get user info:", error);
+          setUserEmail(null);
+        }
+      } else {
+        setUserEmail(null);
+      }
+    };
+
+    // Check login state immediately
+    checkLoginStateAndUserInfo();
+
+    // Poll for login state changes every 1 second
+    const interval = setInterval(checkLoginStateAndUserInfo, 1000);
+
+    return () => clearInterval(interval);
+  }, [isInitialized, airService]);
+
   return {
     address,
     chainId,
     isConnected: !!address,
-    isInitialized
+    isInitialized,
+    isLoggedIn,
+    userEmail
   };
 };
