@@ -79,3 +79,21 @@ export const getNameFromAccessToken = (accessToken: string | null) => {
     return null;
   }
 };
+
+export const formatAirProviderInfo = (
+  address: string | null, 
+  chainId: string | null, 
+  isConnected: boolean, 
+  isInitialized: boolean
+): string => {
+  if (!isInitialized) {
+    return "AIR Services not initialized";
+  }
+  
+  if (!isConnected || !address) {
+    return "AIR Services initialized, no wallet connected";
+  }
+
+  const formattedAddress = formatAddress(address);
+  return chainId ? `${formattedAddress} (Chain: ${chainId})` : formattedAddress;
+};

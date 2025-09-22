@@ -3,10 +3,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { env } from "@/lib/env";
 import { useSession } from "@/lib/hooks/useSession";
-import { getNameFromAccessToken } from "@/lib/utils";
+import { useAirProvider } from "@/lib/hooks/useAirProvider";
+import { getNameFromAccessToken, formatAirProviderInfo } from "@/lib/utils";
 
 export const DebuggingInfo = () => {
   const { accessToken } = useSession();
+  const airProvider = useAirProvider();
   const jwksUrl = `${window.location.origin}/jwks.json`;
 
   return (
@@ -21,6 +23,18 @@ export const DebuggingInfo = () => {
             <Label className="text-xs">Connected User</Label>
             <div className="px-2 py-1 bg-muted rounded text-xs font-mono">
               {accessToken ? getNameFromAccessToken(accessToken) : "Not connected"}
+            </div>
+          </div>
+
+          <div className="space-y-1">
+            <Label className="text-xs">AIR Services Provider Wallet</Label>
+            <div className="px-2 py-1 bg-muted rounded text-xs font-mono">
+              {formatAirProviderInfo(
+                airProvider.address,
+                airProvider.chainId,
+                airProvider.isConnected,
+                airProvider.isInitialized
+              )}
             </div>
           </div>
 
