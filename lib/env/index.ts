@@ -12,7 +12,6 @@ export const env = createEnv({
   server: {
     PARTNER_PRIVATE_KEY: z.string(),
     SIGNING_ALGORITHM: z.enum(["ES256", "RS256"]).default("ES256"),
-    NEXT_PRIVATE_NANSEN_API_KEY: z.string(),
     NEXT_PRIVATE_TEST_ADDRESS: z.string().optional(),
   },
   client: {
@@ -29,7 +28,6 @@ export const env = createEnv({
   },
   runtimeEnv: {
     PARTNER_PRIVATE_KEY: process.env.PARTNER_PRIVATE_KEY,
-    NEXT_PRIVATE_NANSEN_API_KEY: process.env.NEXT_PRIVATE_NANSEN_API_KEY,
     NEXT_PRIVATE_TEST_ADDRESS: process.env.NEXT_PRIVATE_TEST_ADDRESS,
     NEXT_PUBLIC_PARTNER_ID: process.env.NEXT_PUBLIC_PARTNER_ID,
     NEXT_PUBLIC_ISSUER_DID: process.env.NEXT_PUBLIC_ISSUER_DID,
