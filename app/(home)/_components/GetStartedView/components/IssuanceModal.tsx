@@ -99,7 +99,7 @@ export function IssuanceModal() {
       const { response, jwt } = userData;
 
       // Remove is_test_address from credential data
-      const { is_test_address, ...credentialResponse } = response as Record<string, string | number | boolean | null>;
+      const { is_test_address: _is_test_address, ...credentialResponse } = response as Record<string, string | number | boolean | null>;
 
       await issueCredential({ response: credentialResponse as Record<string, string | number | object | null>, jwt });
     } catch (error) {

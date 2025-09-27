@@ -33,26 +33,27 @@ export const useAirProvider = (): AirProviderInfo => {
     // Update login state
     setIsLoggedIn(airService.isLoggedIn);
 
-    let provider: any = null;
-    let handleAccountsChanged: ((accounts: string[]) => void) | null = null;
-    let handleChainChanged: ((chainId: string) => void) | null = null;
-    let handleConnect: ((connectInfo: any) => void) | null = null;
-    let handleDisconnect: ((error: any) => void) | null = null;
+    let provider: unknown = null;
+    let handleAccountsChanged: ((...args: unknown[]) => void) | null = null;
+    let handleChainChanged: ((...args: unknown[]) => void) | null = null;
+    let handleConnect: ((...args: unknown[]) => void) | null = null;
+    let handleDisconnect: ((...args: unknown[]) => void) | null = null;
 
     const fetchProviderInfo = async () => {
       try {
         // Get the provider from AIR Services
         provider = airService.getProvider();
         
-        if (provider && typeof provider.request === 'function') {
+        if (provider && typeof (provider as Record<string, unknown>).request === 'function') {
           // Get accounts using standard RPC call
-          const accounts = await provider.request({ 
+          const providerTyped = provider as { request: (params: { method: string; params: unknown[] }) => Promise<unknown> };
+          const accounts = await providerTyped.request({ 
             method: "eth_accounts",
             params: []
           }) as string[];
           
           // Get chain ID using standard RPC call  
-          const chainIdHex = await provider.request({ 
+          const chainIdHex = await providerTyped.request({ 
             method: "eth_chainId",
             params: []
           }) as string;
@@ -61,32 +62,39 @@ export const useAirProvider = (): AirProviderInfo => {
           setChainId(chainIdHex ? parseInt(chainIdHex, 16).toString() : null);
 
           // Set up event listeners for provider changes
-          handleAccountsChanged = (accounts: string[]) => {
+          handleAccountsChanged = (...args: unknown[]) => {
+            const accounts = args[0] as string[];
             console.log("AIR Services accounts changed:", accounts);
-            setAddress(accounts[0] || null);
+            setAddress(accounts?.[0] || null);
           };
 
-          handleChainChanged = (chainId: string) => {
+          handleChainChanged = (...args: unknown[]) => {
+            const chainId = args[0] as string;
             console.log("AIR Services chain changed to:", chainId);
-            setChainId(parseInt(chainId, 16).toString());
+            setChainId(chainId ? parseInt(chainId, 16).toString() : null);
           };
 
-          handleConnect = (connectInfo: any) => {
-            console.log("AIR Services wallet connected:", connectInfo);
+          handleConnect = (...args: unknown[]) => {
+            console.log("AIR Services wallet connected:", args[0]);
           };
 
-          handleDisconnect = (error: any) => {
-            console.log("AIR Services wallet disconnected:", error);
+          handleDisconnect = (...args: unknown[]) => {
+            console.log("AIR Services wallet disconnected:", args[0]);
             setAddress(null);
             setChainId(null);
           };
 
           // Add event listeners if provider supports them
-          if (typeof provider.on === 'function') {
-            provider.on("accountsChanged", handleAccountsChanged);
-            provider.on("chainChanged", handleChainChanged);
-            provider.on("connect", handleConnect);
-            provider.on("disconnect", handleDisconnect);
+          const providerWithEvents = provider as { 
+            on?: (event: string, listener: (...args: unknown[]) => void) => void;
+            removeListener?: (event: string, listener: (...args: unknown[]) => void) => void;
+          };
+          
+          if (typeof providerWithEvents.on === 'function') {
+            providerWithEvents.on("accountsChanged", handleAccountsChanged);
+            providerWithEvents.on("chainChanged", handleChainChanged);
+            providerWithEvents.on("connect", handleConnect);
+            providerWithEvents.on("disconnect", handleDisconnect);
           }
         }
       } catch (error) {
@@ -100,11 +108,15 @@ export const useAirProvider = (): AirProviderInfo => {
 
     // Cleanup function
     return () => {
-      if (provider && typeof provider.removeListener === 'function') {
-        if (handleAccountsChanged) provider.removeListener("accountsChanged", handleAccountsChanged);
-        if (handleChainChanged) provider.removeListener("chainChanged", handleChainChanged);
-        if (handleConnect) provider.removeListener("connect", handleConnect);
-        if (handleDisconnect) provider.removeListener("disconnect", handleDisconnect);
+      const providerWithEvents = provider as { 
+        removeListener?: (event: string, listener: (...args: unknown[]) => void) => void;
+      };
+      
+      if (provider && typeof providerWithEvents.removeListener === 'function') {
+        if (handleAccountsChanged) providerWithEvents.removeListener("accountsChanged", handleAccountsChanged);
+        if (handleChainChanged) providerWithEvents.removeListener("chainChanged", handleChainChanged);
+        if (handleConnect) providerWithEvents.removeListener("connect", handleConnect);
+        if (handleDisconnect) providerWithEvents.removeListener("disconnect", handleDisconnect);
       }
     };
   }, [isInitialized, airService]);
