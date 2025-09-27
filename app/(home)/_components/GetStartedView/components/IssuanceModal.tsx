@@ -133,10 +133,10 @@ export function IssuanceModal() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
           </div>
           <div className="text-sm text-muted-foreground">
-            Fetching your portfolio data from Nansen...
+            Fetching your data...
           </div>
           <div className="text-xs text-muted-foreground">
-            This may take a moment while we gather your current and historical token holdings
+            This may take a moment while we gather your data.
           </div>
         </div>
       ) : (
