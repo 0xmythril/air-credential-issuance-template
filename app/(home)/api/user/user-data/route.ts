@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
     const ethosData = await fetchEthosData(effectiveUserId);
 
     const responseData = {
-      address: effectiveUserId,
+      // address: effectiveUserId,
       is_test_address: CONFIG.TEST_ADDRESS ? true : false,
       score: ethosData.score,
       level: ethosData.level,
