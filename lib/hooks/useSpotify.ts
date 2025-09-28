@@ -124,7 +124,7 @@ export const useSpotify = (): UseSpotifyReturn => {
     if (!spotifyApi) return [];
     
     try {
-      const topArtists = await spotifyApi.currentUser.topItems("artists", timeRange, limit as any);
+      const topArtists = await spotifyApi.currentUser.topItems("artists", timeRange, limit as 1 | 20 | 50);
       return topArtists.items.map(artist => ({
         id: artist.id,
         name: artist.name,
@@ -146,7 +146,7 @@ export const useSpotify = (): UseSpotifyReturn => {
     if (!spotifyApi) return [];
     
     try {
-      const topTracks = await spotifyApi.currentUser.topItems("tracks", timeRange, limit as any);
+      const topTracks = await spotifyApi.currentUser.topItems("tracks", timeRange, limit as 1 | 20 | 50);
       return topTracks.items.map(track => ({
         id: track.id,
         name: track.name,

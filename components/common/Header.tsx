@@ -17,7 +17,6 @@ import { useSession } from "../../lib/hooks/useSession";
 import { useAirProvider } from "../../lib/hooks/useAirProvider";
 import { useSpotify } from "../../lib/hooks/useSpotify";
 import { env } from "@/lib/env";
-import { LogOut } from "lucide-react";
 
 export const Header = () => {
   const { accessToken, setAccessToken } = useSession();

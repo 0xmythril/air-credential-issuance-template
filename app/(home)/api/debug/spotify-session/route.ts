@@ -10,12 +10,13 @@ export async function GET(request: NextRequest) {
 
   try {
     const sessionAccessTokenResult = await verifySessionAccessToken(sessionAccessToken);
+    const tokenData = sessionAccessTokenResult as { spotifyAccessToken?: string; type?: string };
     
     return NextResponse.json({
       status: "success",
       decoded_token: sessionAccessTokenResult,
-      has_spotify_token: !!(sessionAccessTokenResult as any).spotifyAccessToken,
-      user_type: (sessionAccessTokenResult as any).type || "unknown",
+      has_spotify_token: !!tokenData.spotifyAccessToken,
+      user_type: tokenData.type || "unknown",
     });
   } catch (error) {
     return NextResponse.json({

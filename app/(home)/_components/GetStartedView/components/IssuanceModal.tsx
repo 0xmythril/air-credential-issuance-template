@@ -23,12 +23,39 @@ export function IssuanceModal() {
   const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
 
+  // Interfaces for type safety
+  interface SpotifyArtist {
+    name: string;
+    genres?: string[];
+  }
+  
+  interface SpotifyTrack {
+    name: string;
+    artists?: string[];
+  }
+  
+  interface MusicTasteSummary {
+    music_diversity_score?: number;
+    top_genres?: string[];
+    total_followed_artists?: number;
+  }
+  
+  interface SpotifyUserData {
+    user_type?: string;
+    spotify_id?: string;
+    display_name?: string;
+    followed_artists?: SpotifyArtist[] | unknown[];
+    top_artists?: SpotifyArtist[] | unknown[];
+    top_tracks?: SpotifyTrack[] | unknown[];
+    music_taste_summary?: MusicTasteSummary | Record<string, unknown>;
+  }
+
   // Transform data to be AIR Kit credential compatible (single level, objects with numbered keys)
-  const transformForCredential = (data: any): Record<string, string | number | boolean | object> => {
+  const transformForCredential = (data: SpotifyUserData | Record<string, unknown>): Record<string, string | number | boolean | object> => {
     const transformed: Record<string, string | number | boolean | object> = {};
     
     // Helper function to convert array to numbered object with prefixed keys (limit to 3 items)
-    const arrayToNumberedObject = (arr: any[], prefix: string, getName: (item: any) => string) => {
+    const arrayToNumberedObject = (arr: unknown[], prefix: string, getName: (item: unknown) => string) => {
       const obj: Record<string, string> = {};
       const items = arr.slice(0, 3); // Limit to 3 items
       items.forEach((item, index) => {
@@ -44,42 +71,54 @@ export function IssuanceModal() {
       if (data.display_name) transformed.display_name = data.display_name;
       
       // Transform arrays to numbered objects with prefixed keys (top 3 only)
-      if (data.followed_artists?.length) {
+      if (Array.isArray(data.followed_artists) && data.followed_artists.length > 0) {
         transformed.followed_artists = arrayToNumberedObject(
           data.followed_artists,
           'followed_artists',
-          (artist: any) => typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
+          (artist: unknown) => {
+            if (typeof artist === 'string') return artist;
+            const artistObj = artist as SpotifyArtist;
+            return artistObj.name || 'Unknown Artist';
+          }
         );
       }
-      if (data.top_artists?.length) {
+      if (Array.isArray(data.top_artists) && data.top_artists.length > 0) {
         transformed.top_artists = arrayToNumberedObject(
           data.top_artists,
           'top_artists',
-          (artist: any) => typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
+          (artist: unknown) => {
+            if (typeof artist === 'string') return artist;
+            const artistObj = artist as SpotifyArtist;
+            return artistObj.name || 'Unknown Artist';
+          }
         );
       }
-      if (data.top_tracks?.length) {
+      if (Array.isArray(data.top_tracks) && data.top_tracks.length > 0) {
         transformed.top_tracks = arrayToNumberedObject(
           data.top_tracks,
           'top_tracks',
-          (track: any) => typeof track === 'string' ? track : track.name || 'Unknown Track'
+          (track: unknown) => {
+            if (typeof track === 'string') return track;
+            const trackObj = track as SpotifyTrack;
+            return trackObj.name || 'Unknown Track';
+          }
         );
       }
       
       // Flatten music_taste_summary into individual fields
-      if (data.music_taste_summary) {
-        const summary = data.music_taste_summary;
-        if (summary.music_diversity_score !== undefined) {
+      if (data.music_taste_summary && typeof data.music_taste_summary === 'object') {
+        const summary = data.music_taste_summary as MusicTasteSummary;
+        if (typeof summary.music_diversity_score === 'number') {
           transformed.music_diversity_score = summary.music_diversity_score;
         }
-        if (summary.top_genres?.length) {
+        if (Array.isArray(summary.top_genres) && summary.top_genres.length > 0) {
           transformed.top_genres = arrayToNumberedObject(
             summary.top_genres,
             'top_genres',
-            (genre: any) => typeof genre === 'string' ? genre : genre.toString()
+            (genre: unknown) => typeof genre === 'string' ? genre : String(genre)
           );
         }
-        if (summary.total_followed_artists !== undefined) {
+        if (typeof summary.total_followed_artists === 'number') {
           transformed.total_followed_artists = summary.total_followed_artists;
         }
         // Exclude total_top_artists and total_top_tracks as requested
@@ -272,7 +311,7 @@ export function IssuanceModal() {
       const { response, jwt } = finalUserData;
 
       // Transform response data for AIR Kit credential format
-      const transformedResponse = transformForCredential(response as any);
+      const transformedResponse = transformForCredential(response as SpotifyUserData | Record<string, unknown>);
       
       console.log("🔄 Data transformation:", {
         original: response,
@@ -335,7 +374,7 @@ export function IssuanceModal() {
                 </div>
               ) : !accessToken ? (
                 <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3">
-                  ℹ️ You're signed in to Spotify. Click "Get My Music Data" to fetch your listening history and create a credential.
+                  ℹ️ You&apos;re signed in to Spotify. Click &ldquo;Get My Music Data&rdquo; to fetch your listening history and create a credential.
                 </div>
               ) : null}
             </div>
@@ -360,7 +399,7 @@ export function IssuanceModal() {
                       
                       {/* Transform and display the credential data */}
                       {(() => {
-                        const credentialData = transformForCredential(response as any);
+                        const credentialData = transformForCredential(response as SpotifyUserData | Record<string, unknown>);
                         return (
                           <div className="space-y-3">
                             {/* Basic Info */}

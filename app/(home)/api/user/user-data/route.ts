@@ -87,14 +87,44 @@ const fetchEthosData = async (address: string): Promise<EthosApiResponse> => {
   }
 };
 
+// Interface for session token
+interface SessionToken {
+  sub?: string;
+  name?: string;
+  email?: string;
+  type?: string;
+  spotifyAccessToken?: string;
+}
+
+// Spotify API response interfaces
+interface SpotifyArtist {
+  name: string;
+  genres: string[];
+  id?: string;
+}
+
+interface SpotifyTrack {
+  name: string;
+  artists: Array<{ name: string }>;
+  id?: string;
+}
+
+interface SpotifyApiResponse<T> {
+  items: T[];
+}
+
+interface SpotifyFollowResponse {
+  artists: SpotifyApiResponse<SpotifyArtist>;
+}
+
 /**
  * Fetches Spotify data using the Spotify access token from session
  */
-const fetchSpotifyData = async (sessionToken: any, spotifyAccessToken?: string): Promise<SpotifyDataResponse> => {
+const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?: string): Promise<SpotifyDataResponse> => {
   console.log("🔄 Starting Spotify data fetch...");
   
-  const spotifyId = sessionToken.sub;
-  const displayName = sessionToken.name;
+  const spotifyId = sessionToken.sub || 'unknown';
+  const displayName = sessionToken.name || spotifyId;
   
   console.log(`👤 Spotify user: ${spotifyId} (${displayName})`);
 
@@ -115,8 +145,8 @@ const fetchSpotifyData = async (sessionToken: any, spotifyAccessToken?: string):
       });
 
       if (topArtistsResponse.ok) {
-        const topArtistsData = await topArtistsResponse.json();
-        topArtists = topArtistsData.items.map((artist: any) => ({
+        const topArtistsData: SpotifyApiResponse<SpotifyArtist> = await topArtistsResponse.json();
+        topArtists = topArtistsData.items.map((artist: SpotifyArtist) => ({
           name: artist.name,
           genres: artist.genres,
         }));
@@ -131,10 +161,10 @@ const fetchSpotifyData = async (sessionToken: any, spotifyAccessToken?: string):
       });
 
       if (topTracksResponse.ok) {
-        const topTracksData = await topTracksResponse.json();
-        topTracks = topTracksData.items.map((track: any) => ({
+        const topTracksData: SpotifyApiResponse<SpotifyTrack> = await topTracksResponse.json();
+        topTracks = topTracksData.items.map((track: SpotifyTrack) => ({
           name: track.name,
-          artists: track.artists.map((artist: any) => artist.name),
+          artists: track.artists.map((artist: { name: string }) => artist.name),
         }));
         console.log(`✅ Fetched ${topTracks.length} top tracks`);
       }
@@ -147,8 +177,8 @@ const fetchSpotifyData = async (sessionToken: any, spotifyAccessToken?: string):
       });
 
       if (followedArtistsResponse.ok) {
-        const followedArtistsData = await followedArtistsResponse.json();
-        followedArtists = followedArtistsData.artists.items.map((artist: any) => ({
+        const followedArtistsData: SpotifyFollowResponse = await followedArtistsResponse.json();
+        followedArtists = followedArtistsData.artists.items.map((artist: SpotifyArtist) => ({
           name: artist.name,
           genres: artist.genres,
         }));
@@ -208,7 +238,7 @@ export async function POST(request: NextRequest) {
   let sessionAccessTokenResult;
   try {
     sessionAccessTokenResult = await verifySessionAccessToken(sessionAccessToken);
-    console.log("✅ Token verified, user type:", (sessionAccessTokenResult as any).type);
+    console.log("✅ Token verified, user type:", (sessionAccessTokenResult as { type?: string }).type);
   } catch (error) {
     console.error("❌ Token verification failed:", error);
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -227,11 +257,12 @@ export async function POST(request: NextRequest) {
     if (type === "spotify") {
       console.log("🎵 Processing Spotify user");
       // Extract Spotify access token from session
-      const spotifyAccessToken = (sessionAccessTokenResult as any).spotifyAccessToken;
+      const tokenData = sessionAccessTokenResult as SessionToken;
+      const spotifyAccessToken = tokenData.spotifyAccessToken;
       console.log("🔑 Spotify access token available:", !!spotifyAccessToken);
       
       // Fetch Spotify-specific data
-      const spotifyData = await fetchSpotifyData(sessionAccessTokenResult, spotifyAccessToken);
+      const spotifyData = await fetchSpotifyData(tokenData, spotifyAccessToken);
       responseData = {
         user_type: "spotify",
         ...spotifyData,
