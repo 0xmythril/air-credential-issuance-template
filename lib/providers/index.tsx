@@ -8,6 +8,7 @@ import {
 } from "@rainbow-me/rainbowkit";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "next-themes";
+import { SessionProvider } from "next-auth/react";
 import React, { useMemo } from "react";
 import { HttpTransport } from "viem";
 import { Chain, mainnet } from "viem/chains";
@@ -29,6 +30,7 @@ export const Providers: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { accessToken, setAccessToken } = useSession();
+  const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
 
   const authenticationAdapter = useMemo(
     () =>
@@ -113,6 +115,23 @@ export const Providers: React.FC<{
     });
   }, []);
 
+  const content = (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <ErrorHandler>
+          <RainbowKitAuthenticationProvider
+            adapter={authenticationAdapter}
+            status={accessToken ? "authenticated" : "unauthenticated"}
+          >
+            <RainbowKitProvider>
+              <AirkitProvider>{children}</AirkitProvider>
+            </RainbowKitProvider>
+          </RainbowKitAuthenticationProvider>
+        </ErrorHandler>
+      </QueryClientProvider>
+    </WagmiProvider>
+  );
+
   return (
     <ThemeProvider
       attribute="class"
@@ -122,20 +141,11 @@ export const Providers: React.FC<{
         env.NEXT_PUBLIC_THEME !== "system" ? env.NEXT_PUBLIC_THEME : undefined
       }
     >
-      <WagmiProvider config={config}>
-        <QueryClientProvider client={queryClient}>
-          <ErrorHandler>
-            <RainbowKitAuthenticationProvider
-              adapter={authenticationAdapter}
-              status={accessToken ? "authenticated" : "unauthenticated"}
-            >
-              <RainbowKitProvider>
-                <AirkitProvider>{children}</AirkitProvider>
-              </RainbowKitProvider>
-            </RainbowKitAuthenticationProvider>
-          </ErrorHandler>
-        </QueryClientProvider>
-      </WagmiProvider>
+      {isSpotifyLogin ? (
+        <SessionProvider>{content}</SessionProvider>
+      ) : (
+        content
+      )}
     </ThemeProvider>
   );
 };

@@ -15,6 +15,7 @@ import { useDisconnect } from "wagmi";
 import { useAirkit } from "../../lib/hooks/useAirkit";
 import { useSession } from "../../lib/hooks/useSession";
 import { useAirProvider } from "../../lib/hooks/useAirProvider";
+import { useSpotify } from "../../lib/hooks/useSpotify";
 import { env } from "@/lib/env";
 import { LogOut } from "lucide-react";
 
@@ -22,9 +23,11 @@ export const Header = () => {
   const { accessToken, setAccessToken } = useSession();
   const { airService } = useAirkit();
   const airProvider = useAirProvider();
+  const spotify = useSpotify();
   const { disconnect: wagmiDisconnect } = useDisconnect();
   const isWalletLogin = env.NEXT_PUBLIC_AUTH_METHOD === "wallet";
   const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
+  const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
 
   const logout = async () => {
     if (isWalletLogin) {
@@ -34,6 +37,9 @@ export const Header = () => {
       if (airService.isLoggedIn) {
         await airService.logout();
       }
+    }
+    if (isSpotifyLogin) {
+      spotify.signOut();
     }
     setAccessToken(null);
   };
@@ -69,11 +75,14 @@ export const Header = () => {
           />
         </Link>
         <div className="flex items-center gap-2 mr-4">
-          {accessToken && (
+          {(accessToken || (isSpotifyLogin && spotify.isAuthenticated)) && (
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
-                  {String(getNameFromAccessToken(accessToken))}
+                  {isSpotifyLogin 
+                    ? spotify.user?.display_name || spotify.user?.id || "Spotify User"
+                    : String(getNameFromAccessToken(accessToken))
+                  }
                 </Button>
               </DialogTrigger>
               <DialogContent className="sm:max-w-[300px]">
@@ -82,11 +91,22 @@ export const Header = () => {
                 </DialogHeader>
                 <div className="space-y-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Address</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isSpotifyLogin ? "Spotify ID" : "Address"}
+                    </p>
                     <p className="font-mono text-sm">
-                      {String(getNameFromAccessToken(accessToken))}
+                      {isSpotifyLogin 
+                        ? spotify.user?.id
+                        : String(getNameFromAccessToken(accessToken))
+                      }
                     </p>
                   </div>
+                  {isSpotifyLogin && spotify.user?.email && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Email</p>
+                      <p className="text-sm">{spotify.user.email}</p>
+                    </div>
+                  )}
                   <Button
                     variant="destructive"
                     onClick={() => logout()}

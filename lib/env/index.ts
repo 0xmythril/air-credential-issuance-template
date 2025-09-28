@@ -13,6 +13,10 @@ export const env = createEnv({
     PARTNER_PRIVATE_KEY: z.string(),
     SIGNING_ALGORITHM: z.enum(["ES256", "RS256"]).default("ES256"),
     NEXT_PRIVATE_TEST_ADDRESS: z.string().optional(),
+    SPOTIFY_CLIENT_ID: z.string(),
+    SPOTIFY_CLIENT_SECRET: z.string(),
+    NEXTAUTH_SECRET: z.string(),
+    NEXTAUTH_URL: z.string().optional(),
   },
   client: {
     NEXT_PUBLIC_PARTNER_ID: z.string(),
@@ -23,12 +27,17 @@ export const env = createEnv({
     NEXT_PUBLIC_APP_NAME: z.string(),
     NEXT_PUBLIC_BUILD_ENV: z.enum(BUILD_ENV),
     NEXT_PUBLIC_MOCA_CHAIN: z.enum(MocaChain),
-    NEXT_PUBLIC_AUTH_METHOD: z.enum(["wallet", "airkit"]).default("wallet"),
+    NEXT_PUBLIC_AUTH_METHOD: z.enum(["wallet", "airkit", "spotify"]).default("wallet"),
     NEXT_PUBLIC_THEME: z.enum(["light", "dark", "system"]),
+    NEXT_PUBLIC_SPOTIFY_CLIENT_ID: z.string().optional(),
   },
   runtimeEnv: {
     PARTNER_PRIVATE_KEY: process.env.PARTNER_PRIVATE_KEY,
     NEXT_PRIVATE_TEST_ADDRESS: process.env.NEXT_PRIVATE_TEST_ADDRESS,
+    SPOTIFY_CLIENT_ID: process.env.SPOTIFY_CLIENT_ID,
+    SPOTIFY_CLIENT_SECRET: process.env.SPOTIFY_CLIENT_SECRET,
+    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET,
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
     NEXT_PUBLIC_PARTNER_ID: process.env.NEXT_PUBLIC_PARTNER_ID,
     NEXT_PUBLIC_ISSUER_DID: process.env.NEXT_PUBLIC_ISSUER_DID,
     NEXT_PUBLIC_ISSUE_PROGRAM_ID: process.env.NEXT_PUBLIC_ISSUE_PROGRAM_ID,
@@ -40,6 +49,7 @@ export const env = createEnv({
     NEXT_PUBLIC_AUTH_METHOD: process.env.NEXT_PUBLIC_AUTH_METHOD,
     SIGNING_ALGORITHM: process.env.SIGNING_ALGORITHM,
     NEXT_PUBLIC_THEME: process.env.NEXT_PUBLIC_THEME,
+    NEXT_PUBLIC_SPOTIFY_CLIENT_ID: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
   },
 });
 
