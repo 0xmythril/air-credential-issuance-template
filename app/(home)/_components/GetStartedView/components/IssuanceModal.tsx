@@ -23,9 +23,19 @@ export function IssuanceModal() {
   const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
 
-  // Transform data to be AIR Kit credential compatible (single level, primitive values only)
-  const transformForCredential = (data: any): Record<string, string | number | boolean | string[]> => {
-    const transformed: Record<string, string | number | boolean | string[]> = {};
+  // Transform data to be AIR Kit credential compatible (single level, objects with numbered keys)
+  const transformForCredential = (data: any): Record<string, string | number | boolean | object> => {
+    const transformed: Record<string, string | number | boolean | object> = {};
+    
+    // Helper function to convert array to numbered object with prefixed keys (limit to 3 items)
+    const arrayToNumberedObject = (arr: any[], prefix: string, getName: (item: any) => string) => {
+      const obj: Record<string, string> = {};
+      const items = arr.slice(0, 3); // Limit to 3 items
+      items.forEach((item, index) => {
+        obj[`${prefix}_${index + 1}`] = getName(item);
+      });
+      return obj;
+    };
     
     // Handle Spotify data
     if (data.user_type === "spotify") {
@@ -33,20 +43,26 @@ export function IssuanceModal() {
       if (data.spotify_id) transformed.spotify_id = data.spotify_id;
       if (data.display_name) transformed.display_name = data.display_name;
       
-      // Transform arrays to simple string arrays (names only)
+      // Transform arrays to numbered objects with prefixed keys (top 3 only)
       if (data.followed_artists?.length) {
-        transformed.followed_artists = data.followed_artists.map((artist: any) => 
-          typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
+        transformed.followed_artists = arrayToNumberedObject(
+          data.followed_artists,
+          'followed_artists',
+          (artist: any) => typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
         );
       }
       if (data.top_artists?.length) {
-        transformed.top_artists = data.top_artists.map((artist: any) => 
-          typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
+        transformed.top_artists = arrayToNumberedObject(
+          data.top_artists,
+          'top_artists',
+          (artist: any) => typeof artist === 'string' ? artist : artist.name || 'Unknown Artist'
         );
       }
       if (data.top_tracks?.length) {
-        transformed.top_tracks = data.top_tracks.map((track: any) => 
-          typeof track === 'string' ? track : track.name || 'Unknown Track'
+        transformed.top_tracks = arrayToNumberedObject(
+          data.top_tracks,
+          'top_tracks',
+          (track: any) => typeof track === 'string' ? track : track.name || 'Unknown Track'
         );
       }
       
@@ -57,7 +73,11 @@ export function IssuanceModal() {
           transformed.music_diversity_score = summary.music_diversity_score;
         }
         if (summary.top_genres?.length) {
-          transformed.top_genres = summary.top_genres;
+          transformed.top_genres = arrayToNumberedObject(
+            summary.top_genres,
+            'top_genres',
+            (genre: any) => typeof genre === 'string' ? genre : genre.toString()
+          );
         }
         if (summary.total_followed_artists !== undefined) {
           transformed.total_followed_artists = summary.total_followed_artists;
@@ -69,7 +89,7 @@ export function IssuanceModal() {
       for (const [key, value] of Object.entries(data)) {
         if (key === "is_test_address") continue; // Skip test address
         if (value != null) {
-          transformed[key] = value as string | number | boolean | string[];
+          transformed[key] = value as string | number | boolean | object;
         }
       }
     }
@@ -81,7 +101,7 @@ export function IssuanceModal() {
     response,
     jwt,
   }: {
-    response: Record<string, string | number | boolean | string[]>;
+    response: Record<string, string | number | boolean | object>;
     jwt: string;
   }) => {
     setIsWidgetLoading(true);
@@ -258,6 +278,7 @@ export function IssuanceModal() {
         original: response,
         transformed: transformedResponse
       });
+      console.log("📋 Transformed credential structure:", JSON.stringify(transformedResponse, null, 2));
 
       console.log("🎯 About to issue credential with:", { credentialResponse: transformedResponse, jwt: jwt ? "present" : "missing" });
       await issueCredential({ response: transformedResponse, jwt });
@@ -347,74 +368,95 @@ export function IssuanceModal() {
                               <div className="text-xs font-medium text-muted-foreground">Profile:</div>
                               <div className="pl-2 space-y-1 text-xs">
                                 {credentialData.display_name && (
-                                  <div><span className="font-medium">Name:</span> {credentialData.display_name}</div>
+                                  <div><span className="font-medium">Name:</span> {String(credentialData.display_name)}</div>
                                 )}
                                 {credentialData.spotify_id && (
-                                  <div><span className="font-medium">Spotify ID:</span> {credentialData.spotify_id}</div>
+                                  <div><span className="font-medium">Spotify ID:</span> {String(credentialData.spotify_id)}</div>
                                 )}
                               </div>
                             </div>
 
                             {/* Music Data */}
-                            {(Array.isArray(credentialData.followed_artists) && credentialData.followed_artists.length > 0) || 
-                             (Array.isArray(credentialData.top_artists) && credentialData.top_artists.length > 0) || 
-                             (Array.isArray(credentialData.top_tracks) && credentialData.top_tracks.length > 0) ? (
-                              <div className="space-y-1">
-                                <div className="text-xs font-medium text-muted-foreground">Music Data:</div>
-                                <div className="pl-2 space-y-1 text-xs">
-                                  {Array.isArray(credentialData.followed_artists) && credentialData.followed_artists.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Followed Artists ({credentialData.followed_artists.length}):</span>
-                                      <div className="text-muted-foreground mt-1">
-                                        {credentialData.followed_artists.slice(0, 3).join(", ")}
-                                        {credentialData.followed_artists.length > 3 && ` +${credentialData.followed_artists.length - 3} more`}
+                            {(() => {
+                              const hasFollowedArtists = credentialData.followed_artists && typeof credentialData.followed_artists === 'object' && Object.keys(credentialData.followed_artists).length > 0;
+                              const hasTopArtists = credentialData.top_artists && typeof credentialData.top_artists === 'object' && Object.keys(credentialData.top_artists).length > 0;
+                              const hasTopTracks = credentialData.top_tracks && typeof credentialData.top_tracks === 'object' && Object.keys(credentialData.top_tracks).length > 0;
+                              
+                              if (!hasFollowedArtists && !hasTopArtists && !hasTopTracks) return null;
+                              
+                              return (
+                                <div className="space-y-1">
+                                  <div className="text-xs font-medium text-muted-foreground">Music Data:</div>
+                                  <div className="pl-2 space-y-1 text-xs">
+                                    {hasFollowedArtists && (
+                                      <div>
+                                        <span className="font-medium">Top 3 Followed Artists:</span>
+                                        <div className="text-muted-foreground mt-1">
+                                          {Object.values(credentialData.followed_artists as Record<string, string>).join(", ")}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground/70 mt-1">
+                                          Keys: {Object.keys(credentialData.followed_artists as Record<string, string>).join(", ")}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                  {Array.isArray(credentialData.top_artists) && credentialData.top_artists.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Top Artists ({credentialData.top_artists.length}):</span>
-                                      <div className="text-muted-foreground mt-1">
-                                        {credentialData.top_artists.slice(0, 3).join(", ")}
-                                        {credentialData.top_artists.length > 3 && ` +${credentialData.top_artists.length - 3} more`}
+                                    )}
+                                    {hasTopArtists && (
+                                      <div>
+                                        <span className="font-medium">Top 3 Artists:</span>
+                                        <div className="text-muted-foreground mt-1">
+                                          {Object.values(credentialData.top_artists as Record<string, string>).join(", ")}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground/70 mt-1">
+                                          Keys: {Object.keys(credentialData.top_artists as Record<string, string>).join(", ")}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
-                                  {Array.isArray(credentialData.top_tracks) && credentialData.top_tracks.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Top Tracks ({credentialData.top_tracks.length}):</span>
-                                      <div className="text-muted-foreground mt-1">
-                                        {credentialData.top_tracks.slice(0, 3).join(", ")}
-                                        {credentialData.top_tracks.length > 3 && ` +${credentialData.top_tracks.length - 3} more`}
+                                    )}
+                                    {hasTopTracks && (
+                                      <div>
+                                        <span className="font-medium">Top 3 Tracks:</span>
+                                        <div className="text-muted-foreground mt-1">
+                                          {Object.values(credentialData.top_tracks as Record<string, string>).join(", ")}
+                                        </div>
+                                        <div className="text-xs text-muted-foreground/70 mt-1">
+                                          Keys: {Object.keys(credentialData.top_tracks as Record<string, string>).join(", ")}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ) : null}
+                              );
+                            })()}
 
                             {/* Music Analytics */}
-                            {(Array.isArray(credentialData.top_genres) && credentialData.top_genres.length > 0) || 
-                             credentialData.music_diversity_score !== undefined || 
-                             credentialData.total_followed_artists !== undefined ? (
-                              <div className="space-y-1">
-                                <div className="text-xs font-medium text-muted-foreground">Music Analytics:</div>
-                                <div className="pl-2 space-y-1 text-xs">
-                                  {Array.isArray(credentialData.top_genres) && credentialData.top_genres.length > 0 && (
-                                    <div>
-                                      <span className="font-medium">Top Genres:</span>
-                                      <div className="text-muted-foreground">{credentialData.top_genres.join(", ")}</div>
-                                    </div>
-                                  )}
-                                  {credentialData.music_diversity_score !== undefined && (
-                                    <div><span className="font-medium">Music Diversity Score:</span> {credentialData.music_diversity_score}</div>
-                                  )}
-                                  {credentialData.total_followed_artists !== undefined && (
-                                    <div><span className="font-medium">Total Followed Artists:</span> {credentialData.total_followed_artists}</div>
-                                  )}
+                            {(() => {
+                              const hasTopGenres = credentialData.top_genres && typeof credentialData.top_genres === 'object' && Object.keys(credentialData.top_genres).length > 0;
+                              const hasDiversityScore = credentialData.music_diversity_score !== undefined;
+                              const hasTotalFollowed = credentialData.total_followed_artists !== undefined;
+                              
+                              if (!hasTopGenres && !hasDiversityScore && !hasTotalFollowed) return null;
+                              
+                              return (
+                                <div className="space-y-1">
+                                  <div className="text-xs font-medium text-muted-foreground">Music Analytics:</div>
+                                  <div className="pl-2 space-y-1 text-xs">
+                                    {hasTopGenres && (
+                                      <div>
+                                        <span className="font-medium">Top 3 Genres:</span>
+                                        <div className="text-muted-foreground">{Object.values(credentialData.top_genres as Record<string, string>).join(", ")}</div>
+                                        <div className="text-xs text-muted-foreground/70 mt-1">
+                                          Keys: {Object.keys(credentialData.top_genres as Record<string, string>).join(", ")}
+                                        </div>
+                                      </div>
+                                    )}
+                                    {hasDiversityScore && (
+                                      <div><span className="font-medium">Music Diversity Score:</span> {String(credentialData.music_diversity_score)}</div>
+                                    )}
+                                    {hasTotalFollowed && (
+                                      <div><span className="font-medium">Total Followed Artists:</span> {String(credentialData.total_followed_artists)}</div>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                            ) : null}
+                              );
+                            })()}
                           </div>
                         );
                       })()}

@@ -1,6 +1,17 @@
-# Credential Issuance Template
+# AIR Credential Issuance Template
 
-A modern template for issuing verifiable credentials using AIR Kit, with wallet integration, a customizable UI, and type-safe development.
+A modern, flexible template for issuing verifiable credentials using AIR Kit. Supports multiple authentication methods including crypto wallets, AIR Kit user sessions, and third-party OAuth providers (Spotify, etc.).
+
+## 🚀 Quick Start
+
+This template supports multiple authentication methods:
+
+- **🔗 Crypto Wallet** - Connect via MetaMask, WalletConnect, etc.
+- **🆔 AIR Kit User ID** - Direct AIR Kit authentication  
+- **🎵 Spotify OAuth** - Authenticate with Spotify and issue music taste credentials
+- **🔧 Custom OAuth** - Extensible for other OAuth providers
+
+> **📚 Need detailed setup instructions?** See the [Documentation](#-documentation) section below or check the [`docs/`](docs/) folder for comprehensive guides.
 
 ## Getting Started
 
@@ -50,12 +61,16 @@ A modern template for issuing verifiable credentials using AIR Kit, with wallet 
    2. Under the Issuer section, Create an Issuance Program and create/choose a Schema that's appropriate for your application. Make note of the Schema details and the Issuance Program ID.
 
 
-### 2. Decide how you will identify your users in this app
-| Option   | Identifier            | Details                                                                 |
-|----------|-----------------------|-------------------------------------------------------------------------|
-| 1 | Wallet Address        | Uses Wallet Connect to authenticate and identify users via their wallet. (NEXT_PUBLIC_AUTH_METHOD=wallet) |
-| 2 | AIR Kit User ID       | Uses AIR Kit user ID  (NEXT_PUBLIC_AUTH_METHOD=airkit)   |
-| 3 | Your internal User ID | Custom - Manage your own user ID and session using JWT and cookies. [See Details](#bringing-your-own-user-session).    |
+### 2. Choose Your Authentication Method
+
+| Method | Identifier | Use Case | Configuration |
+|--------|------------|----------|---------------|
+| **🔗 Wallet** | Wallet Address | Web3 users, DeFi applications | `NEXT_PUBLIC_AUTH_METHOD=wallet` |
+| **🆔 AIR Kit** | AIR Kit User ID | Direct AIR Kit integration | `NEXT_PUBLIC_AUTH_METHOD=airkit` |
+| **🎵 Spotify** | Spotify User ID | Music applications, entertainment | `NEXT_PUBLIC_AUTH_METHOD=spotify` |
+| **🔧 Custom** | Your User ID | Custom OAuth providers | `NEXT_PUBLIC_AUTH_METHOD=custom` |
+
+> **📚 Documentation**: See `.notes/AUTHENTICATION_SETUP.md` for detailed setup guides for all authentication methods.
 
 ### 3. Set up Signing keys
 
@@ -110,7 +125,7 @@ Once JWKS URL is set, you should be able to issue credentials locally as well as
 | `NEXT_PUBLIC_APP_NAME`       | Application name.                                                          |
 | `NEXT_PUBLIC_BUILD_ENV`      | Build environment (`production`, `sandbox`, `staging`).                    |
 | `NEXT_PUBLIC_MOCA_CHAIN`     | MOCA chain (`devnet`, `testnet`).                                          |
-| `NEXT_PUBLIC_AUTH_METHOD`    | Authentication method (`wallet` or `airkit`).                              |
+| `NEXT_PUBLIC_AUTH_METHOD`    | Authentication method (`wallet`, `airkit`, `spotify`, or `custom`).      |
 | `NEXT_PUBLIC_THEME`          | The theme of the app (`light`, `dark`, `system`).                          |
 
 #### Server-side Variables
@@ -198,14 +213,28 @@ This project uses Shadcn UI for a customizable design system. Refer to the [Shad
 - [TanStack Query](https://tanstack.com/query) - Data fetching
 - [Zod](https://zod.dev/) - Schema validation
 
-## Learn More
+## 📚 Documentation
 
-Explore the documentation for the technologies used in this project:
+### Quick Reference
+- **Authentication Setup**: See [Authentication Methods](#authentication-methods) section above
+- **Environment Variables**: See [Environment Variables](#environment-variables) section above
+- **Spotify Integration**: See [Spotify Setup Guide](docs/SPOTIFY_SETUP.md)
 
+### Detailed Documentation
+For comprehensive guides and detailed setup instructions, see the [`docs/`](docs/) folder:
+
+- **[📚 Documentation Index](docs/README.md)** - Complete documentation overview
+- **[🔧 Authentication Setup](docs/AUTHENTICATION_SETUP.md)** - Complete setup for all authentication methods
+- **[🎵 Spotify Integration](docs/SPOTIFY_SETUP.md)** - Spotify OAuth setup and configuration
+- **[🛠️ Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Development practices and project structure
+
+### External Resources
 - [Next.js Documentation](https://nextjs.org/docs)
 - [MOCA Network](https://moca.network/)
 - [Wagmi Documentation](https://wagmi.sh/)
 - [Shadcn UI](https://ui.shadcn.com/)
+- [AIR Kit Documentation](https://docs.air3.com/)
+- [NextAuth.js Documentation](https://next-auth.js.org/)
 
 ## License
 

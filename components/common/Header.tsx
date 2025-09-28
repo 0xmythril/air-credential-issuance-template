@@ -80,7 +80,7 @@ export const Header = () => {
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   {isSpotifyLogin 
-                    ? spotify.user?.display_name || spotify.user?.id || "Spotify User"
+                    ? spotify.user?.display_name || spotify.user?.id || "Log out: Spotify"
                     : String(getNameFromAccessToken(accessToken))
                   }
                 </Button>
@@ -127,7 +127,8 @@ export const Header = () => {
               className="flex items-center gap-2"
               title={`AIR User: ${airProvider.userEmail}, Connected=${airProvider.isConnected}, Address=${airProvider.address}`}
             >
-              <LogOut className="h-4 w-4" />
+              {/* <LogOut className="h-4 w-4" /> */}
+              {"AIR: "}
               {airProvider.userEmail}
             </Button>
           )}
