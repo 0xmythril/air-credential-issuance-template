@@ -66,9 +66,8 @@ export function IssuanceModal() {
     
     // Handle Spotify data
     if (data.user_type === "spotify") {
-      // Basic user info (exclude user_type as requested)
+      // Basic user info (exclude user_type and display_name as requested)
       if (data.spotify_id) transformed.spotify_id = data.spotify_id;
-      if (data.display_name) transformed.display_name = data.display_name;
       
       // Transform arrays to numbered objects with prefixed keys (top 3 only)
       if (Array.isArray(data.followed_artists) && data.followed_artists.length > 0) {
@@ -406,9 +405,6 @@ export function IssuanceModal() {
                             <div className="space-y-1">
                               <div className="text-xs font-medium text-muted-foreground">Profile:</div>
                               <div className="pl-2 space-y-1 text-xs">
-                                {credentialData.display_name && (
-                                  <div><span className="font-medium">Name:</span> {String(credentialData.display_name)}</div>
-                                )}
                                 {credentialData.spotify_id && (
                                   <div><span className="font-medium">Spotify ID:</span> {String(credentialData.spotify_id)}</div>
                                 )}
