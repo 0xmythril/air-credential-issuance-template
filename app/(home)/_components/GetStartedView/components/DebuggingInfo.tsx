@@ -20,7 +20,7 @@ export const DebuggingInfo = () => {
 
         <CardContent className="p-3 space-y-2">
           <div className="space-y-1">
-            <Label className="text-xs">Connected User</Label>
+            <Label className="text-xs">Spotify Connected User</Label>
             <div className="px-2 py-1 bg-muted rounded text-xs font-mono">
               {accessToken ? getNameFromAccessToken(accessToken) : "Not connected"}
             </div>

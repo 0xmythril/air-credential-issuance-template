@@ -58,7 +58,8 @@ export const useSpotify = (): UseSpotifyReturn => {
   const isLoading = status === "loading";
   const isAuthenticated = status === "authenticated" && !!session?.accessToken;
   const accessToken = session?.accessToken as string | null;
-  const user = session?.user as SpotifyUser | null;
+  // NextAuth session.user has different structure than SpotifyUser
+  const user = session?.user || null;
 
   // Create Spotify API instance
   const spotifyApi = useMemo(() => {

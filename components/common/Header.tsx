@@ -79,7 +79,7 @@ export const Header = () => {
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   {isSpotifyLogin 
-                    ? spotify.user?.display_name || spotify.user?.id || "Log out: Spotify"
+                    ? "Manage Spotify Account"
                     : String(getNameFromAccessToken(accessToken))
                   }
                 </Button>
