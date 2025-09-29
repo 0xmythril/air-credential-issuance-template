@@ -119,17 +119,43 @@ export const Header = () => {
           )}
           
           {airProvider.isLoggedIn && airProvider.userEmail && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={logoutAirServices}
-              className="flex items-center gap-2"
-              title={`AIR User: ${airProvider.userEmail}, Connected=${airProvider.isConnected}, Address=${airProvider.address}`}
-            >
-              {/* <LogOut className="h-4 w-4" /> */}
-              {"AIR: "}
-              {airProvider.userEmail}
-            </Button>
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2"
+                  title={`AIR User: ${airProvider.userEmail}, Address=${airProvider.address}`}
+                >
+                  {"AIR: "}
+                  {airProvider.userEmail}
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-[300px]">
+                <DialogHeader>
+                  <DialogTitle>AIR Services Account</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-sm text-muted-foreground">Email</p>
+                    <p className="text-sm">{airProvider.userEmail}</p>
+                  </div>
+                  {airProvider.address && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Address</p>
+                      <p className="font-mono text-xs break-all">{airProvider.address}</p>
+                    </div>
+                  )}
+                  <Button
+                    variant="destructive"
+                    onClick={logoutAirServices}
+                    className="w-full"
+                  >
+                    Logout from AIR Services
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           )}
         </div>
       </div>
