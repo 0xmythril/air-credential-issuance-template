@@ -95,15 +95,15 @@ export const Header = () => {
                     </p>
                     <p className="font-mono text-sm">
                       {isSpotifyLogin 
-                        ? spotify.user?.id
+                        ? String((spotify.user as Record<string, unknown>)?.id || 'Unknown')
                         : String(getNameFromAccessToken(accessToken))
                       }
                     </p>
                   </div>
-                  {isSpotifyLogin && spotify.user?.email && (
+                  {isSpotifyLogin && !!(spotify.user as Record<string, unknown>)?.email && (
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
-                      <p className="text-sm">{spotify.user.email}</p>
+                      <p className="text-sm">{String((spotify.user as Record<string, unknown>).email)}</p>
                     </div>
                   )}
                   <Button

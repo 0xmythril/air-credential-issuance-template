@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       email: email || spotifyUser.email,
     });
   } catch (error) {
-    console.error("Spotify auth error:", error);
+    console.error("Spotify auth error: Authentication service error");
     return NextResponse.json(
       { error: "Failed to authenticate with Spotify" },
       { status: 500 }

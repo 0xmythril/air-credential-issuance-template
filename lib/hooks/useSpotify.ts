@@ -38,7 +38,7 @@ export interface UseSpotifyReturn {
   // Session
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: SpotifyUser | null;
+  user: Record<string, unknown> | null; // NextAuth session user structure
   accessToken: string | null;
   
   // Auth actions

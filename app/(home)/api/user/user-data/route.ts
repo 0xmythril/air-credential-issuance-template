@@ -67,22 +67,20 @@ const createUserDataResponse = async (data: object): Promise<UserDataResponse> =
  * Fetches data from Ethos API for the specified address
  */
 const fetchEthosData = async (address: string): Promise<EthosApiResponse> => {
-  console.log("🔄 Starting Ethos data fetch...");
-  console.log(`👤 Target address: ${address}${CONFIG.TEST_ADDRESS ? ' (TEST MODE)' : ''}`);
+  // Fetching Ethos data for address: ${address}${CONFIG.TEST_ADDRESS ? ' (TEST MODE)' : ''}
 
   try {
     const response = await fetch(`${CONFIG.ETHOS_BASE_URL}?address=${address}`);
     
     if (response.ok) {
       const data = await response.json() as EthosApiResponse;
-      console.log("✅ Ethos data fetch complete:", data);
       return data;
     } else {
       console.error(`❌ Failed to fetch Ethos data: ${response.status}`);
       return {};
     }
   } catch (error) {
-    console.error("❌ Failed to fetch Ethos data:", error);
+    console.error("❌ Failed to fetch Ethos data: Network or API error");
     return {};
   }
 };
@@ -121,12 +119,8 @@ interface SpotifyFollowResponse {
  * Fetches Spotify data using the Spotify access token from session
  */
 const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?: string): Promise<SpotifyDataResponse> => {
-  console.log("🔄 Starting Spotify data fetch...");
-  
   const spotifyId = sessionToken.sub || 'unknown';
   const displayName = sessionToken.name || spotifyId;
-  
-  console.log(`👤 Spotify user: ${spotifyId} (${displayName})`);
 
   let topArtists: Array<{ name: string; genres: string[] }> = [];
   let topTracks: Array<{ name: string; artists: string[] }> = [];
@@ -135,7 +129,6 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
   // If we have a Spotify access token, fetch real data
   if (spotifyAccessToken) {
     try {
-      console.log("🎵 Fetching Spotify music data...");
 
       // Fetch top artists (last 6 months)
       const topArtistsResponse = await fetch("https://api.spotify.com/v1/me/top/artists?limit=10&time_range=medium_term", {
@@ -150,7 +143,6 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
           name: artist.name,
           genres: artist.genres,
         }));
-        console.log(`✅ Fetched ${topArtists.length} top artists`);
       }
 
       // Fetch top tracks (last 6 months)
@@ -166,7 +158,6 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
           name: track.name,
           artists: track.artists.map((artist: { name: string }) => artist.name),
         }));
-        console.log(`✅ Fetched ${topTracks.length} top tracks`);
       }
 
       // Fetch followed artists
@@ -182,15 +173,13 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
           name: artist.name,
           genres: artist.genres,
         }));
-        console.log(`✅ Fetched ${followedArtists.length} followed artists`);
       }
 
     } catch (error) {
-      console.error("❌ Error fetching Spotify data:", error);
+      // Error fetching Spotify data - using basic user info only
       // Continue with empty arrays if API calls fail
     }
   } else {
-    console.log("⚠️ No Spotify access token provided, using basic user info only");
   }
 
   // Process the data to create meaningful insights
@@ -218,7 +207,6 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
     },
   };
 
-  console.log("✅ Spotify data prepared:", responseData);
   return responseData;
 };
 
@@ -227,20 +215,17 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
 // =============================================
 
 export async function POST(request: NextRequest) {
-  console.log("🔄 User data API called");
   const sessionAccessToken = request.headers.get("Authorization");
 
   if (!sessionAccessToken) {
-    console.log("❌ No authorization header");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
   let sessionAccessTokenResult;
   try {
     sessionAccessTokenResult = await verifySessionAccessToken(sessionAccessToken);
-    console.log("✅ Token verified, user type:", (sessionAccessTokenResult as { type?: string }).type);
   } catch (error) {
-    console.error("❌ Token verification failed:", error);
+    console.error("❌ Token verification failed: Invalid or expired token");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -255,11 +240,9 @@ export async function POST(request: NextRequest) {
 
     // Check if this is a Spotify user
     if (type === "spotify") {
-      console.log("🎵 Processing Spotify user");
       // Extract Spotify access token from session
       const tokenData = sessionAccessTokenResult as SessionToken;
       const spotifyAccessToken = tokenData.spotifyAccessToken;
-      console.log("🔑 Spotify access token available:", !!spotifyAccessToken);
       
       // Fetch Spotify-specific data
       const spotifyData = await fetchSpotifyData(tokenData, spotifyAccessToken);
@@ -267,7 +250,6 @@ export async function POST(request: NextRequest) {
         user_type: "spotify",
         ...spotifyData,
       };
-      console.log("✅ Spotify data processed, keys:", Object.keys(responseData));
     } else {
       // Determine effective user ID (test mode override) for wallet users
       const effectiveUserId = CONFIG.TEST_ADDRESS || userId;
@@ -287,7 +269,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(await createUserDataResponse(responseData));
   } catch (error) {
-    console.error("Error fetching user data:", error);
+    console.error("Error fetching user data: Internal server error");
     return NextResponse.json(
       { error: "Failed to fetch user data" },
       { status: 500 }

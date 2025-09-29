@@ -151,21 +151,15 @@ export function IssuanceModal() {
         }
       }
       
-      console.log("🚀 Issuing credential with AIR Kit:", {
-        authToken: jwt ? "present" : "missing",
-        credentialId: env.NEXT_PUBLIC_ISSUE_PROGRAM_ID,
-        credentialSubject: credentialSubject,
-        issuerDid: env.NEXT_PUBLIC_ISSUER_DID,
-      });
-      
-      await airService.issueCredential({
+      // Issue credential with AIR Kit
+      const issueResult = await airService.issueCredential({
         authToken: jwt,
+        issuerDid: env.NEXT_PUBLIC_ISSUER_DID,
         credentialId: env.NEXT_PUBLIC_ISSUE_PROGRAM_ID,
         credentialSubject,
-        issuerDid: env.NEXT_PUBLIC_ISSUER_DID,
       });
       
-      console.log("✅ Credential issued successfully!");
+      console.log("✅ Credential issued successfully:", issueResult);
       setIsSuccess(true);
     } catch (error) {
       console.error("❌ Error issuing credential:", error);
@@ -218,9 +212,7 @@ export function IssuanceModal() {
             setAccessToken(data.accessToken);
             
             // Wait for user data to be fetched before proceeding
-            console.log("🔄 Refetching user data after Spotify auth...");
             const result = await refetch();
-            console.log("📊 Refetch result:", result);
             if (!result.data) {
               throw new Error("Failed to fetch user data after Spotify authentication");
             }
@@ -237,9 +229,7 @@ export function IssuanceModal() {
       }
 
       // AIR Kit login is required for all authentication methods
-      console.log("🔑 Checking AIR Kit login status:", airService.isLoggedIn);
       while (!airService.isLoggedIn) {
-        console.log("🔑 Logging into AIR Kit...");
         await airService.login();
       }
       console.log("✅ AIR Kit login complete");
@@ -281,18 +271,10 @@ export function IssuanceModal() {
       }
 
       name = isSpotifyLogin 
-        ? spotify.user?.display_name || spotify.user?.id || "Spotify User"
+        ? (spotify.user as Record<string, unknown>)?.display_name as string || (spotify.user as Record<string, unknown>)?.id as string || "Spotify User"
         : getNameFromAccessToken(accessToken);
 
       // Final check for user data availability
-      console.log("Debug - checking user data:", { 
-        userData: userData, 
-        accessToken: accessToken,
-        isSpotifyLogin: isSpotifyLogin,
-        spotifyAuth: spotify.isAuthenticated,
-        isError: isError,
-        isUserDataLoading: isUserDataLoading
-      });
       
       // If we still don't have userData, try one more refetch
       let finalUserData = userData;
@@ -312,15 +294,11 @@ export function IssuanceModal() {
       // Transform response data for AIR Kit credential format
       const transformedResponse = transformForCredential(response as SpotifyUserData | Record<string, unknown>);
       
-      console.log("🔄 Data transformation:", {
-        original: response,
-        transformed: transformedResponse
+      // Issue credential with transformed data
+      await issueCredential({
+        response: transformedResponse,
+        jwt: jwt,
       });
-      console.log("📋 Transformed credential structure:", JSON.stringify(transformedResponse, null, 2));
-
-      console.log("🎯 About to issue credential with:", { credentialResponse: transformedResponse, jwt: jwt ? "present" : "missing" });
-      await issueCredential({ response: transformedResponse, jwt });
-      console.log("🎉 Credential issuance process completed!");
     } catch (error) {
       console.error("❌ Error in credential issuance process:", error);
       // Re-throw the error so user sees it
@@ -503,17 +481,17 @@ export function IssuanceModal() {
                 ) : (
                   // Original wallet/other display
                   Object.entries(response).map(([key, value]) => {
-                    // Skip the is_test_address field from display
-                    if (key === "is_test_address") return null;
-                    
-                    const isTestAddress = Boolean((response as Record<string, unknown>).is_test_address);
-                    const isAddressField = key === "address";
-                    
-                    return (
-                      <div key={key} className={isAddressField && isTestAddress ? "text-orange-600 font-semibold" : ""}>
-                        {formatKey(key, isTestAddress)}: {formatValue(key, value)}
-                      </div>
-                    );
+                  // Skip the is_test_address field from display
+                  if (key === "is_test_address") return null;
+                  
+                  const isTestAddress = Boolean((response as Record<string, unknown>).is_test_address);
+                  const isAddressField = key === "address";
+                  
+                  return (
+                    <div key={key} className={isAddressField && isTestAddress ? "text-orange-600 font-semibold" : ""}>
+                      {formatKey(key, isTestAddress)}: {formatValue(key, value)}
+                    </div>
+                  );
                   })
                 )}
               </div>

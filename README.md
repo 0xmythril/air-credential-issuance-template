@@ -4,12 +4,14 @@ A modern, flexible template for issuing verifiable credentials using AIR Kit. Su
 
 ## 🚀 Quick Start
 
-This template supports multiple authentication methods:
+This template features a **modular authentication system** supporting multiple methods:
 
 - **🔗 Crypto Wallet** - Connect via MetaMask, WalletConnect, etc.
 - **🆔 AIR Kit User ID** - Direct AIR Kit authentication  
 - **🎵 Spotify OAuth** - Authenticate with Spotify and issue music taste credentials
-- **🔧 Custom OAuth** - Extensible for other OAuth providers
+- **🔧 Custom OAuth** - Easily extensible for Twitter, Facebook, GitHub, and more
+
+> **✨ New**: [Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md) - Easy to extend with new providers!
 
 > **📚 Need detailed setup instructions?** See the [Documentation](#-documentation) section below or check the [`docs/`](docs/) folder for comprehensive guides.
 
@@ -224,7 +226,8 @@ This project uses Shadcn UI for a customizable design system. Refer to the [Shad
 For comprehensive guides and detailed setup instructions, see the [`docs/`](docs/) folder:
 
 - **[📚 Documentation Index](docs/README.md)** - Complete documentation overview
-- **[🔧 Authentication Setup](docs/AUTHENTICATION_SETUP.md)** - Complete setup for all authentication methods
+- **[🔧 Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md)** - **NEW!** Extensible auth system
+- **[🔧 Authentication Setup](docs/AUTHENTICATION_SETUP.md)** - Setup for all authentication methods
 - **[🎵 Spotify Integration](docs/SPOTIFY_SETUP.md)** - Spotify OAuth setup and configuration
 - **[🛠️ Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Development practices and project structure
 
