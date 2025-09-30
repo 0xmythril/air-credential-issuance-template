@@ -9,7 +9,8 @@ This template features a **modular authentication system** supporting multiple m
 - **🔗 Crypto Wallet** - Connect via MetaMask, WalletConnect, etc.
 - **🆔 AIR Kit User ID** - Direct AIR Kit authentication  
 - **🎵 Spotify OAuth** - Authenticate with Spotify and issue music taste credentials
-- **🔧 Custom OAuth** - Easily extensible for Twitter, Facebook, GitHub, and more
+- **𝕏 Twitter/X OAuth** - Authenticate with Twitter and issue profile credentials
+- **🔧 Custom OAuth** - Easily extensible for Facebook, GitHub, and more
 
 > **✨ New**: [Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md) - Easy to extend with new providers!
 
@@ -70,9 +71,10 @@ This template features a **modular authentication system** supporting multiple m
 | **🔗 Wallet** | Wallet Address | Web3 users, DeFi applications | `NEXT_PUBLIC_AUTH_METHOD=wallet` |
 | **🆔 AIR Kit** | AIR Kit User ID | Direct AIR Kit integration | `NEXT_PUBLIC_AUTH_METHOD=airkit` |
 | **🎵 Spotify** | Spotify User ID | Music applications, entertainment | `NEXT_PUBLIC_AUTH_METHOD=spotify` |
+| **𝕏 Twitter** | Twitter User ID | Social media credentials, profile data | `NEXT_PUBLIC_AUTH_METHOD=twitter` |
 | **🔧 Custom** | Your User ID | Custom OAuth providers | `NEXT_PUBLIC_AUTH_METHOD=custom` |
 
-> **📚 Documentation**: See `.notes/AUTHENTICATION_SETUP.md` for detailed setup guides for all authentication methods.
+> **📚 Documentation**: See [docs/AUTHENTICATION_SETUP.md](docs/AUTHENTICATION_SETUP.md) for detailed setup guides for all authentication methods.
 
 ### 3. Set up Signing keys
 
@@ -127,7 +129,7 @@ Once JWKS URL is set, you should be able to issue credentials locally as well as
 | `NEXT_PUBLIC_APP_NAME`       | Application name.                                                          |
 | `NEXT_PUBLIC_BUILD_ENV`      | Build environment (`production`, `sandbox`, `staging`).                    |
 | `NEXT_PUBLIC_MOCA_CHAIN`     | MOCA chain (`devnet`, `testnet`).                                          |
-| `NEXT_PUBLIC_AUTH_METHOD`    | Authentication method (`wallet`, `airkit`, `spotify`, or `custom`).      |
+| `NEXT_PUBLIC_AUTH_METHOD`    | Authentication method (`wallet`, `airkit`, `spotify`, `twitter`, or `custom`).      |
 | `NEXT_PUBLIC_THEME`          | The theme of the app (`light`, `dark`, `system`).                          |
 
 #### Server-side Variables
@@ -229,6 +231,7 @@ For comprehensive guides and detailed setup instructions, see the [`docs/`](docs
 - **[🔧 Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md)** - **NEW!** Extensible auth system
 - **[🔧 Authentication Setup](docs/AUTHENTICATION_SETUP.md)** - Setup for all authentication methods
 - **[🎵 Spotify Integration](docs/SPOTIFY_SETUP.md)** - Spotify OAuth setup and configuration
+- **[𝕏 Twitter Integration](docs/TWITTER_SETUP.md)** - Twitter OAuth setup and configuration
 - **[🛠️ Development Guide](docs/DEVELOPMENT_GUIDE.md)** - Development practices and project structure
 
 ### External Resources

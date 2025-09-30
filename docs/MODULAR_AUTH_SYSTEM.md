@@ -371,18 +371,19 @@ const provider = AuthProviderFactory.create('spotify', {
 5. **🎯 Type-Safe**: Full TypeScript support
 6. **📚 Discoverable**: Auto-registration and provider discovery
 
-## 🚀 Future Providers
+## 🚀 Supported & Future Providers
 
 The system is designed to easily support additional providers:
 
 - ✅ Spotify (implemented)
 - ✅ Wallet (implemented) 
 - ✅ AIR Kit (implemented)
-- 🔄 Twitter/X (template provided)
+- ✅ Twitter/X (implemented)
 - 🔄 Facebook
 - 🔄 GitHub
 - 🔄 Discord
 - 🔄 Apple ID
+- 🔄 Google
 - 🔄 Custom OAuth providers
 
 Each new provider follows the same pattern, making the system highly scalable and maintainable.

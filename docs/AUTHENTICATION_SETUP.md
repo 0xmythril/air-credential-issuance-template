@@ -91,9 +91,48 @@ This guide covers setup for different authentication methods supported by the AI
 
 ---
 
+## 𝕏 Twitter/X Authentication
+
+**Use Case**: Social media applications, profile credentials, Twitter analytics  
+**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=twitter`
+
+### Setup Steps
+
+1. **Create Twitter App**
+   - Go to [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
+   - Create new project and app
+   - Set up OAuth 2.0 authentication
+   - Set redirect URI: `http://127.0.0.1:3000/api/auth/callback/twitter` (development)
+   - Set redirect URI: `https://yourapp.com/api/auth/callback/twitter` (production)
+
+2. **Required Environment Variables**
+   ```bash
+   NEXT_PUBLIC_AUTH_METHOD=twitter
+   TWITTER_CLIENT_ID=your_twitter_client_id
+   TWITTER_CLIENT_SECRET=your_twitter_client_secret
+   NEXTAUTH_SECRET=your_random_secret
+   NEXTAUTH_URL=http://127.0.0.1:3000  # Development
+   ```
+
+3. **User Flow**
+   - User clicks "Sign in with Twitter"
+   - Redirects to Twitter authorization
+   - User grants permissions
+   - Twitter user ID becomes identifier
+   - Profile data is fetched for credential content
+
+### Twitter API Scopes Required
+- `tweet.read` - Read user's tweets
+- `users.read` - Read user's profile information
+- `follows.read` - Read user's followers and following
+
+> **📚 Detailed Guide**: See [TWITTER_SETUP.md](./TWITTER_SETUP.md) for complete Twitter integration setup.
+
+---
+
 ## 🔧 Custom OAuth Authentication
 
-**Use Case**: Other OAuth providers (Google, GitHub, Twitter, etc.)  
+**Use Case**: Other OAuth providers (Google, GitHub, Facebook, etc.)  
 **Configuration**: `NEXT_PUBLIC_AUTH_METHOD=custom`
 
 ### Setup Steps
@@ -141,6 +180,9 @@ NEXT_PUBLIC_AUTH_METHOD=airkit
 
 # For Spotify authentication
 NEXT_PUBLIC_AUTH_METHOD=spotify
+
+# For Twitter authentication
+NEXT_PUBLIC_AUTH_METHOD=twitter
 
 # For custom OAuth
 NEXT_PUBLIC_AUTH_METHOD=custom

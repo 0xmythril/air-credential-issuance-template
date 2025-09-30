@@ -9,6 +9,7 @@ This folder contains comprehensive documentation for the AIR Credential Issuance
 ### Setup Guides
 - **[Authentication Setup](AUTHENTICATION_SETUP.md)** - Complete setup guide for all supported authentication methods
 - **[Spotify Integration](SPOTIFY_SETUP.md)** - Detailed Spotify OAuth setup and configuration
+- **[Twitter Integration](TWITTER_SETUP.md)** - Detailed Twitter OAuth setup and configuration
 
 ### Development
 - **[Development Guide](DEVELOPMENT_GUIDE.md)** - Development practices, project structure, and contribution guidelines
@@ -31,9 +32,9 @@ This folder contains comprehensive documentation for the AIR Credential Issuance
 2. **Choose Auth Method**: Follow [Authentication Setup](AUTHENTICATION_SETUP.md) for your chosen method
 3. **Development**: Use [Development Guide](DEVELOPMENT_GUIDE.md) for development practices
 
-### For Spotify Integration
-1. **Setup**: Follow [Spotify Setup](SPOTIFY_SETUP.md) for configuration
-2. **Implementation**: Review the detailed setup guide
+### For OAuth Integration (Spotify/Twitter)
+1. **Setup**: Follow [Spotify Setup](SPOTIFY_SETUP.md) or [Twitter Setup](TWITTER_SETUP.md) for configuration
+2. **Implementation**: Review the detailed setup guides
 3. **Testing**: Test the integration thoroughly
 
 ### For Adding New Integrations
@@ -47,6 +48,8 @@ This folder contains comprehensive documentation for the AIR Credential Issuance
 |------|---------|----------|
 | `AUTHENTICATION_SETUP.md` | Setup all auth methods | Developers configuring authentication |
 | `SPOTIFY_SETUP.md` | Spotify-specific setup | Developers implementing Spotify |
+| `TWITTER_SETUP.md` | Twitter-specific setup | Developers implementing Twitter |
+| `MODULAR_AUTH_SYSTEM.md` | Modular auth architecture | Developers extending the system |
 | `DEVELOPMENT_GUIDE.md` | Development practices | All developers |
 
 ## 🔄 Keeping Documentation Updated
