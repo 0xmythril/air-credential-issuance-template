@@ -50,6 +50,23 @@ interface TwitterDataResponse {
   [key: string]: unknown;
 }
 
+interface DiscordDataResponse {
+  discord_id: string;
+  username: string;
+  discriminator: string;
+  global_name?: string;
+  verified?: boolean;
+  email?: string;
+  locale?: string;
+  mfa_enabled?: boolean;
+  premium_type?: number;
+  public_flags?: number;
+  guilds_count: number;
+  owned_guilds_count: number;
+  connections_count: number;
+  [key: string]: unknown;
+}
+
 // =============================================
 // CONFIGURATION
 // =============================================
@@ -109,6 +126,7 @@ interface SessionToken {
   type?: string;
   spotifyAccessToken?: string;
   twitterAccessToken?: string;
+  discordAccessToken?: string;
 }
 
 // Spotify API response interfaces
@@ -287,6 +305,80 @@ const fetchTwitterData = async (sessionToken: SessionToken, twitterAccessToken?:
   return responseData;
 };
 
+/**
+ * Fetches Discord data using the Discord access token from session
+ */
+const fetchDiscordData = async (sessionToken: SessionToken, discordAccessToken?: string): Promise<DiscordDataResponse> => {
+  const discordId = sessionToken.sub || 'unknown';
+  const username = sessionToken.name || discordId;
+
+  // Default response structure
+  const responseData: DiscordDataResponse = {
+    discord_id: discordId,
+    username: username,
+    discriminator: '0',
+    guilds_count: 0,
+    owned_guilds_count: 0,
+    connections_count: 0,
+  };
+
+  // If we have a Discord access token, fetch real data
+  if (discordAccessToken) {
+    try {
+      // Fetch user profile data
+      const userResponse = await fetch('https://discord.com/api/users/@me', {
+        headers: {
+          'Authorization': `Bearer ${discordAccessToken}`,
+        },
+      });
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+
+        responseData.discord_id = userData.id;
+        responseData.username = userData.username;
+        responseData.discriminator = userData.discriminator || '0';
+        responseData.global_name = userData.global_name;
+        responseData.verified = userData.verified;
+        responseData.email = userData.email;
+        responseData.locale = userData.locale;
+        responseData.mfa_enabled = userData.mfa_enabled;
+        responseData.premium_type = userData.premium_type;
+        responseData.public_flags = userData.public_flags;
+      }
+
+      // Fetch guilds (servers)
+      const guildsResponse = await fetch('https://discord.com/api/users/@me/guilds', {
+        headers: {
+          'Authorization': `Bearer ${discordAccessToken}`,
+        },
+      });
+
+      if (guildsResponse.ok) {
+        const guilds = await guildsResponse.json();
+        responseData.guilds_count = guilds.length;
+        responseData.owned_guilds_count = guilds.filter((g: { owner: boolean }) => g.owner).length;
+      }
+
+      // Fetch connections (linked accounts)
+      const connectionsResponse = await fetch('https://discord.com/api/users/@me/connections', {
+        headers: {
+          'Authorization': `Bearer ${discordAccessToken}`,
+        },
+      });
+
+      if (connectionsResponse.ok) {
+        const connections = await connectionsResponse.json();
+        responseData.connections_count = connections.length;
+      }
+    } catch (error) {
+      console.error("Error fetching Discord data:", error);
+    }
+  }
+
+  return responseData;
+};
+
 // =============================================
 // MAIN API HANDLER
 // =============================================
@@ -313,7 +405,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "user Id not found" }, { status: 400 });
     }
 
-    let responseData: object;
+    let responseData;
 
     // Check authentication type and fetch appropriate data
     if (type === "spotify") {
@@ -337,6 +429,17 @@ export async function POST(request: NextRequest) {
       responseData = {
         user_type: "twitter",
         ...twitterData,
+      };
+    } else if (type === "discord") {
+      // Extract Discord access token from session
+      const tokenData = sessionAccessTokenResult as SessionToken;
+      const discordAccessToken = tokenData.discordAccessToken;
+      
+      // Fetch Discord-specific data
+      const discordData = await fetchDiscordData(tokenData, discordAccessToken);
+      responseData = {
+        user_type: "discord",
+        ...discordData,
       };
     } else {
       // Determine effective user ID (test mode override) for wallet users

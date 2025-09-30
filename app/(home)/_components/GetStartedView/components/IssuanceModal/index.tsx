@@ -6,7 +6,7 @@ import { getNameFromAccessToken } from "@/lib/utils";
 import { useAccount } from "wagmi";
 import { useUserData } from "../../hooks";
 import { transformForCredential, getHeadline } from "./utils";
-import { SpotifyPreview, TwitterPreview, WalletPreview } from "./DataPreview";
+import { SpotifyPreview, TwitterPreview, DiscordPreview, WalletPreview } from "./DataPreview";
 import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
@@ -17,7 +17,7 @@ export function IssuanceModal() {
   const { data: userData, isError, isLoading: isUserDataLoading, refetch } = useUserData();
   const { accessToken, setAccessToken } = useSession();
 
-  const { handleAuth, isSpotifyLogin, isTwitterLogin, isWalletLogin, spotify, twitter } =
+  const { handleAuth, isSpotifyLogin, isTwitterLogin, isDiscordLogin, isWalletLogin, spotify, twitter, discord } =
     useAuthHandlers({
       accessToken,
       setAccessToken,
@@ -128,6 +128,10 @@ export function IssuanceModal() {
     ? ((twitter.user as Record<string, unknown>)?.name as string) ||
       ((twitter.user as Record<string, unknown>)?.username as string) ||
       "Twitter User"
+    : isDiscordLogin
+    ? ((discord.user as Record<string, unknown>)?.global_name as string) ||
+      ((discord.user as Record<string, unknown>)?.username as string) ||
+      "Discord User"
     : getNameFromAccessToken(accessToken);
 
   const buttonText = isLoading
@@ -142,6 +146,10 @@ export function IssuanceModal() {
     ? twitter.isAuthenticated
       ? "Get My Profile Data"
       : "Sign in with Twitter"
+    : isDiscordLogin
+    ? discord.isAuthenticated
+      ? "Get My Discord Profile"
+      : "Sign in with Discord"
     : isWalletLogin
     ? "Connect Wallet"
     : "Login";
@@ -180,8 +188,10 @@ export function IssuanceModal() {
             <InfoMessages
               isSpotifyLogin={isSpotifyLogin}
               isTwitterLogin={isTwitterLogin}
+              isDiscordLogin={isDiscordLogin}
               spotifyAuthenticated={spotify.isAuthenticated}
               twitterAuthenticated={twitter.isAuthenticated}
+              discordAuthenticated={discord.isAuthenticated}
               hasAccessToken={!!accessToken}
             />
           )}
@@ -201,6 +211,10 @@ export function IssuanceModal() {
                   />
                 ) : isTwitterLogin ? (
                   <TwitterPreview
+                    credentialData={transformForCredential(response as Record<string, unknown>)}
+                  />
+                ) : isDiscordLogin ? (
+                  <DiscordPreview
                     credentialData={transformForCredential(response as Record<string, unknown>)}
                   />
                 ) : (

@@ -107,6 +107,8 @@ export const getHeadline = (): string => {
       return "Store your Music Taste Securely on Moca Network";
     case "twitter":
       return "Store your Twitter Profile Securely on Moca Network";
+    case "discord":
+      return "Store your Discord Profile Securely on Moca Network";
     case "wallet":
       return "Store your Reputation Securely on Moca Network";
     default:

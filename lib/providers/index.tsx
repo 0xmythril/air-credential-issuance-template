@@ -32,7 +32,8 @@ export const Providers: React.FC<{
   const { accessToken, setAccessToken } = useSession();
   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
   const isTwitterLogin = env.NEXT_PUBLIC_AUTH_METHOD === "twitter";
-  const needsSessionProvider = isSpotifyLogin || isTwitterLogin;
+  const isDiscordLogin = env.NEXT_PUBLIC_AUTH_METHOD === "discord";
+  const needsSessionProvider = isSpotifyLogin || isTwitterLogin || isDiscordLogin;
 
   const authenticationAdapter = useMemo(
     () =>

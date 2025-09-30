@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import TwitterProvider from "next-auth/providers/twitter";
+import DiscordProvider from "next-auth/providers/discord";
 import { env } from "./env";
 
 const spotifyScopes = [
@@ -18,6 +19,14 @@ const twitterScopes = [
   "users.read",
   "follows.read",
   "offline.access"
+].join(" ");
+
+// Discord scopes
+const discordScopes = [
+  "identify",
+  "email",
+  "guilds",
+  "connections"
 ].join(" ");
 
 export const authOptions: NextAuthOptions = {
@@ -41,6 +50,15 @@ export const authOptions: NextAuthOptions = {
         },
       },
     }),
+    DiscordProvider({
+      clientId: env.DISCORD_CLIENT_ID || "",
+      clientSecret: env.DISCORD_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          scope: discordScopes,
+        },
+      },
+    }),
   ],
   callbacks: {
     async jwt({ token, account, profile }) {
@@ -60,6 +78,14 @@ export const authOptions: NextAuthOptions = {
             token.twitterUsername = data.username as string;
           }
         }
+        
+        // Store Discord-specific user data
+        if (account.provider === 'discord' && profile) {
+          const discordProfile = profile as Record<string, unknown>;
+          token.discordId = discordProfile.id as string;
+          token.discordUsername = discordProfile.username as string;
+          token.discordDiscriminator = discordProfile.discriminator as string;
+        }
       }
       return token;
     },
@@ -73,6 +99,14 @@ export const authOptions: NextAuthOptions = {
         if (session.user) {
           (session.user as Record<string, unknown>).id = token.twitterId as string;
           (session.user as Record<string, unknown>).username = token.twitterUsername as string;
+        }
+      }
+      
+      if (token.provider === 'discord') {
+        if (session.user) {
+          (session.user as Record<string, unknown>).id = token.discordId as string;
+          (session.user as Record<string, unknown>).username = token.discordUsername as string;
+          (session.user as Record<string, unknown>).discriminator = token.discordDiscriminator as string;
         }
       }
       

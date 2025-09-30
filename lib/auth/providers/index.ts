@@ -8,18 +8,21 @@ import { SpotifyAuthProvider } from './spotify';
 import { WalletAuthProvider } from './wallet';
 import { AirKitAuthProvider } from './airkit';
 import { TwitterAuthProvider } from './twitter';
+import { DiscordAuthProvider } from './discord';
 
 // Register all available providers
 AuthProviderFactory.register('spotify', SpotifyAuthProvider);
 AuthProviderFactory.register('wallet', WalletAuthProvider); 
 AuthProviderFactory.register('airkit', AirKitAuthProvider);
 AuthProviderFactory.register('twitter', TwitterAuthProvider);
+AuthProviderFactory.register('discord', DiscordAuthProvider);
 
 // Export providers for direct usage if needed
 export { SpotifyAuthProvider } from './spotify';
 export { WalletAuthProvider } from './wallet';
 export { AirKitAuthProvider } from './airkit';
 export { TwitterAuthProvider } from './twitter';
+export { DiscordAuthProvider } from './discord';
 export { BaseAuthProvider } from './base';
 
 // Export factory for convenience
@@ -39,6 +42,13 @@ export const PROVIDER_CONFIGS = {
     displayName: 'Twitter/X',
     description: 'Sign in with your Twitter account',
     icon: '𝕏',
+    requiresOAuth: true,
+  },
+  discord: {
+    name: 'discord',
+    displayName: 'Discord',
+    description: 'Sign in with your Discord account',
+    icon: '💬',
     requiresOAuth: true,
   },
   wallet: {
