@@ -31,6 +31,8 @@ export const Providers: React.FC<{
 }> = ({ children }) => {
   const { accessToken, setAccessToken } = useSession();
   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
+  const isTwitterLogin = env.NEXT_PUBLIC_AUTH_METHOD === "twitter";
+  const needsSessionProvider = isSpotifyLogin || isTwitterLogin;
 
   const authenticationAdapter = useMemo(
     () =>
@@ -141,7 +143,7 @@ export const Providers: React.FC<{
         env.NEXT_PUBLIC_THEME !== "system" ? env.NEXT_PUBLIC_THEME : undefined
       }
     >
-      {isSpotifyLogin ? (
+      {needsSessionProvider ? (
         <SessionProvider>{content}</SessionProvider>
       ) : (
         content

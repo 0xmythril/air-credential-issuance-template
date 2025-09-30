@@ -34,6 +34,22 @@ interface SpotifyDataResponse {
   [key: string]: unknown;
 }
 
+interface TwitterDataResponse {
+  twitter_id: string;
+  username: string;
+  name: string;
+  followers_count: number;
+  following_count: number;
+  tweet_count: number;
+  listed_count: number;
+  verified: boolean;
+  description?: string;
+  location?: string;
+  url?: string;
+  account_created_at?: string;
+  [key: string]: unknown;
+}
+
 // =============================================
 // CONFIGURATION
 // =============================================
@@ -92,6 +108,7 @@ interface SessionToken {
   email?: string;
   type?: string;
   spotifyAccessToken?: string;
+  twitterAccessToken?: string;
 }
 
 // Spotify API response interfaces
@@ -210,6 +227,66 @@ const fetchSpotifyData = async (sessionToken: SessionToken, spotifyAccessToken?:
   return responseData;
 };
 
+/**
+ * Fetches Twitter data using the Twitter access token from session
+ */
+const fetchTwitterData = async (sessionToken: SessionToken, twitterAccessToken?: string): Promise<TwitterDataResponse> => {
+  const twitterId = sessionToken.sub || 'unknown';
+  const username = sessionToken.name || twitterId;
+
+  // Default response structure
+  let responseData: TwitterDataResponse = {
+    twitter_id: twitterId,
+    username: username,
+    name: username,
+    followers_count: 0,
+    following_count: 0,
+    tweet_count: 0,
+    listed_count: 0,
+    verified: false,
+  };
+
+  // If we have a Twitter access token, fetch real data
+  if (twitterAccessToken) {
+    try {
+      // Fetch user profile data using Twitter API v2
+      const userResponse = await fetch(
+        'https://api.twitter.com/2/users/me?user.fields=created_at,description,id,location,name,profile_image_url,public_metrics,url,username,verified',
+        {
+          headers: {
+            'Authorization': `Bearer ${twitterAccessToken}`,
+          },
+        }
+      );
+
+      if (userResponse.ok) {
+        const userData = await userResponse.json();
+        const user = userData.data;
+
+        responseData = {
+          twitter_id: user.id,
+          username: user.username,
+          name: user.name,
+          followers_count: user.public_metrics?.followers_count || 0,
+          following_count: user.public_metrics?.following_count || 0,
+          tweet_count: user.public_metrics?.tweet_count || 0,
+          listed_count: user.public_metrics?.listed_count || 0,
+          verified: user.verified || false,
+          description: user.description,
+          location: user.location,
+          url: user.url,
+          account_created_at: user.created_at,
+        };
+      }
+    } catch (error) {
+      // Error fetching Twitter data - using basic user info only
+      console.error("Error fetching Twitter data:", error);
+    }
+  }
+
+  return responseData;
+};
+
 // =============================================
 // MAIN API HANDLER
 // =============================================
@@ -238,7 +315,7 @@ export async function POST(request: NextRequest) {
 
     let responseData: object;
 
-    // Check if this is a Spotify user
+    // Check authentication type and fetch appropriate data
     if (type === "spotify") {
       // Extract Spotify access token from session
       const tokenData = sessionAccessTokenResult as SessionToken;
@@ -249,6 +326,17 @@ export async function POST(request: NextRequest) {
       responseData = {
         user_type: "spotify",
         ...spotifyData,
+      };
+    } else if (type === "twitter") {
+      // Extract Twitter access token from session
+      const tokenData = sessionAccessTokenResult as SessionToken;
+      const twitterAccessToken = tokenData.twitterAccessToken;
+      
+      // Fetch Twitter-specific data
+      const twitterData = await fetchTwitterData(tokenData, twitterAccessToken);
+      responseData = {
+        user_type: "twitter",
+        ...twitterData,
       };
     } else {
       // Determine effective user ID (test mode override) for wallet users

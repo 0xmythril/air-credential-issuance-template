@@ -16,6 +16,7 @@ import { useAirkit } from "../../lib/hooks/useAirkit";
 import { useSession } from "../../lib/hooks/useSession";
 import { useAirProvider } from "../../lib/hooks/useAirProvider";
 import { useSpotify } from "../../lib/hooks/useSpotify";
+import { useTwitter } from "../../lib/hooks/useTwitter";
 import { env } from "@/lib/env";
 
 export const Header = () => {
@@ -23,10 +24,12 @@ export const Header = () => {
   const { airService } = useAirkit();
   const airProvider = useAirProvider();
   const spotify = useSpotify();
+  const twitter = useTwitter();
   const { disconnect: wagmiDisconnect } = useDisconnect();
   const isWalletLogin = env.NEXT_PUBLIC_AUTH_METHOD === "wallet";
   const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
+  const isTwitterLogin = env.NEXT_PUBLIC_AUTH_METHOD === "twitter";
 
   const logout = async () => {
     if (isWalletLogin) {
@@ -39,6 +42,9 @@ export const Header = () => {
     }
     if (isSpotifyLogin) {
       spotify.signOut();
+    }
+    if (isTwitterLogin) {
+      twitter.signOut();
     }
     setAccessToken(null);
   };
@@ -74,12 +80,14 @@ export const Header = () => {
           />
         </Link>
         <div className="flex items-center gap-2 mr-4">
-          {(accessToken || (isSpotifyLogin && spotify.isAuthenticated)) && (
+          {(accessToken || (isSpotifyLogin && spotify.isAuthenticated) || (isTwitterLogin && twitter.isAuthenticated)) && (
             <Dialog>
               <DialogTrigger asChild>
                 <Button variant="outline" size="sm">
                   {isSpotifyLogin 
                     ? "Manage Spotify Account"
+                    : isTwitterLogin
+                    ? "Manage Twitter Account"
                     : String(getNameFromAccessToken(accessToken))
                   }
                 </Button>
@@ -91,11 +99,13 @@ export const Header = () => {
                 <div className="space-y-4">
                   <div>
                     <p className="text-sm text-muted-foreground">
-                      {isSpotifyLogin ? "Spotify ID" : "Address"}
+                      {isSpotifyLogin ? "Spotify ID" : isTwitterLogin ? "Twitter Username" : "Address"}
                     </p>
                     <p className="font-mono text-sm">
                       {isSpotifyLogin 
                         ? String((spotify.user as Record<string, unknown>)?.id || 'Unknown')
+                        : isTwitterLogin
+                        ? String((twitter.user as Record<string, unknown>)?.username || 'Unknown')
                         : String(getNameFromAccessToken(accessToken))
                       }
                     </p>
@@ -104,6 +114,12 @@ export const Header = () => {
                     <div>
                       <p className="text-sm text-muted-foreground">Email</p>
                       <p className="text-sm">{String((spotify.user as Record<string, unknown>).email)}</p>
+                    </div>
+                  )}
+                  {isTwitterLogin && !!(twitter.user as Record<string, unknown>)?.name && (
+                    <div>
+                      <p className="text-sm text-muted-foreground">Name</p>
+                      <p className="text-sm">{String((twitter.user as Record<string, unknown>).name)}</p>
                     </div>
                   )}
                   <Button

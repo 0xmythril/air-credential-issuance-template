@@ -181,13 +181,48 @@ class AirKitDataTransformer implements DataTransformer {
   }
 }
 
+// Twitter data transformer
+class TwitterDataTransformer implements DataTransformer {
+  readonly name = 'twitter';
+
+  transform(data: Record<string, unknown>): Record<string, unknown> {
+    const transformed: Record<string, unknown> = {};
+
+    // Handle Twitter data - simple passthrough with filtering
+    if (data.user_type === "twitter") {
+      // Exclude user_type from the credential
+      for (const [key, value] of Object.entries(data)) {
+        if (key === "user_type") continue;
+        if (value != null) {
+          transformed[key] = value;
+        }
+      }
+    } else {
+      // Handle other data types
+      for (const [key, value] of Object.entries(data)) {
+        if (key === "is_test_address") continue;
+        if (value != null) {
+          transformed[key] = value;
+        }
+      }
+    }
+
+    return transformed;
+  }
+
+  validate(data: Record<string, unknown>): boolean {
+    return typeof data === 'object' && data !== null && 'twitter_id' in data;
+  }
+}
+
 // Register all transformers
 transformerRegistry.register(new SpotifyDataTransformer());
 transformerRegistry.register(new WalletDataTransformer());
 transformerRegistry.register(new AirKitDataTransformer());
+transformerRegistry.register(new TwitterDataTransformer());
 
 // Export transformers
-export { SpotifyDataTransformer, WalletDataTransformer, AirKitDataTransformer };
+export { SpotifyDataTransformer, WalletDataTransformer, AirKitDataTransformer, TwitterDataTransformer };
 
 // Helper function to transform data for any provider
 export function transformForCredential(
