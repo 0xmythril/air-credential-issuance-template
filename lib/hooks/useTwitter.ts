@@ -29,20 +29,34 @@ export function useTwitter(): UseTwitterReturn {
   };
 
   const getCurrentUser = async (): Promise<TwitterUser | null> => {
-    if (!session?.user) return null;
+    console.log("🐦 [useTwitter] getCurrentUser called");
+    console.log("🐦 [useTwitter] Session exists:", !!session);
+    console.log("🐦 [useTwitter] Session user exists:", !!session?.user);
+    
+    if (!session?.user) {
+      console.log("🐦 [useTwitter] No session user, returning null");
+      return null;
+    }
 
     // Return user data from session (NextAuth already fetched this during OAuth)
     const sessionUser = session.user as Record<string, unknown>;
     
+    console.log("🐦 [useTwitter] Session user data:", sessionUser);
+    console.log("🐦 [useTwitter] Session user keys:", Object.keys(sessionUser));
+    
     // Map NextAuth session user to TwitterUser format
-    return {
-      id: (sessionUser.id as string) || '',
+    const twitterUser = {
+      id: (sessionUser.id as string) || (sessionUser.twitterId as string) || '',
       name: (sessionUser.name as string) || '',
-      username: (sessionUser.username as string) || (sessionUser.name as string) || '',
+      username: (sessionUser.username as string) || (sessionUser.twitterUsername as string) || (sessionUser.name as string) || '',
       profile_image_url: sessionUser.image as string | undefined,
       verified: false, // NextAuth doesn't provide this by default
       public_metrics: undefined, // Will be fetched from API in user-data route
     } as TwitterUser;
+    
+    console.log("🐦 [useTwitter] Mapped Twitter user:", twitterUser);
+    
+    return twitterUser;
   };
 
   return {

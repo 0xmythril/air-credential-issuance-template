@@ -4,18 +4,29 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { useDisconnect } from "wagmi";
 import { useSession } from "../hooks/useSession";
+import { useAuthMethod } from "../contexts/AuthMethodContext";
 
 export const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
   const { disconnect } = useDisconnect();
-  const { setAccessToken } = useSession();
+  const sessionStore = useSession();
+  const { authMethod } = useAuthMethod();
   const queryClient = useQueryClient();
 
   useEffect(() => {
     const handleError = (error: Error) => {
       if (error instanceof AxiosError && error.response?.status === 401) {
-        disconnect();
-        setAccessToken(null);
-        toast.error("Session expired, please connect your wallet again");
+        // Clear the session for current auth method
+        sessionStore.clearSession(authMethod);
+        
+        // Only disconnect wallet if on wallet route
+        if (authMethod === "wallet") {
+          disconnect();
+          toast.error("Session expired, please connect your wallet again");
+        } else {
+          // For OAuth methods, show appropriate message
+          const methodName = authMethod.charAt(0).toUpperCase() + authMethod.slice(1);
+          toast.error(`Session expired, please sign in with ${methodName} again`);
+        }
       }
     };
 
@@ -31,7 +42,7 @@ export const ErrorHandler = ({ children }: { children: React.ReactNode }) => {
     return () => {
       unsubscribe();
     };
-  }, [disconnect, setAccessToken, queryClient]);
+  }, [disconnect, sessionStore, authMethod, queryClient]);
 
   return <>{children}</>;
 };

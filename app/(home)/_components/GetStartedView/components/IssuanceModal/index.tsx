@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { env } from "@/lib/env";
+import { useAuthMethod } from "@/lib/contexts/AuthMethodContext";
 import { useAirkit } from "@/lib/hooks/useAirkit";
 import { useSession } from "@/lib/hooks/useSession";
 import { getNameFromAccessToken } from "@/lib/utils";
@@ -10,14 +10,29 @@ import { SpotifyPreview, TwitterPreview, DiscordPreview, WalletPreview } from ".
 import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
+import { toast } from "sonner";
 
 export function IssuanceModal() {
+  const { authMethod } = useAuthMethod();
   const { airService, isInitialized } = useAirkit();
   const { isConnected } = useAccount();
   const { data: userData, isError, isLoading: isUserDataLoading, refetch } = useUserData();
-  const { accessToken, setAccessToken } = useSession();
+  const sessionStore = useSession();
+  
+  // Get session for current auth method
+  const currentSession = sessionStore.getSession(authMethod);
+  const accessToken = currentSession.accessToken;
+  
+  // Set session for current auth method
+  const setAccessToken = (token: string) => {
+    sessionStore.setSession(authMethod, { 
+      accessToken: token,
+      userName: currentSession.userName,
+      userEmail: currentSession.userEmail,
+    });
+  };
 
-  const { handleAuth, isSpotifyLogin, isTwitterLogin, isDiscordLogin, isWalletLogin, spotify, twitter, discord } =
+  const { handleAuth, isSpotifyLogin, isTwitterLogin, isDiscordLogin, isWalletLogin, isAirKitLogin, spotify, twitter, discord } =
     useAuthHandlers({
       accessToken,
       setAccessToken,
@@ -28,24 +43,31 @@ export function IssuanceModal() {
   const { issueCredential, isWidgetLoading, setIsWidgetLoading, isSuccess } =
     useCredentialIssuance({ airService });
 
-  const isAirKitLogin = env.NEXT_PUBLIC_AUTH_METHOD === "airkit";
-
   const onContinue = async () => {
+    console.log("🚀 [onContinue] Starting credential issuance flow");
+    console.log("🚀 [onContinue] Auth method:", authMethod);
+    console.log("🚀 [onContinue] Access token exists:", !!accessToken);
+    
     setIsWidgetLoading(true);
     try {
       // Handle authentication
+      console.log("🚀 [onContinue] Calling handleAuth()...");
       const authSuccess = await handleAuth();
+      console.log("🚀 [onContinue] handleAuth result:", authSuccess);
+      
       if (!authSuccess) {
         // Redirect happened, stop processing
+        console.log("🚀 [onContinue] Auth redirect occurred, stopping");
         setIsWidgetLoading(false);
         return;
       }
 
-      // AIR Kit login is required for all authentication methods
-      while (!airService.isLoggedIn) {
+      // AIR Kit login is required for all authentication methods (only after platform auth is complete)
+      if (!airService.isLoggedIn) {
+        console.log("🔐 Logging into AIR Kit...");
         await airService.login();
+        console.log("✅ AIR Kit login complete");
       }
-      console.log("✅ AIR Kit login complete");
 
       // Handle AIR Kit specific token creation
       if (isAirKitLogin && !accessToken) {
@@ -108,9 +130,35 @@ export function IssuanceModal() {
         jwt: jwt,
       });
     } catch (error) {
-      console.error("❌ Error in credential issuance process:", error);
-      throw error;
+      console.error("🚀 [onContinue] ❌ Error in credential issuance process:", error);
+      
+      // Show user-friendly error message
+      const errorMessage = error instanceof Error ? error.message : "An error occurred";
+      console.log("🚀 [onContinue] Error message:", errorMessage);
+      
+      if (errorMessage.includes("session expired") || errorMessage.includes("Session expired")) {
+        // Session expired - show clear message
+        console.log("🚀 [onContinue] Detected session expired error, clearing session");
+        toast.error(errorMessage);
+        // Clear the session for this auth method
+        sessionStore.clearSession(authMethod);
+      } else if (errorMessage.includes("Bad or expired token")) {
+        console.log("🚀 [onContinue] Detected bad/expired token error, clearing session");
+        toast.error("Session expired. Please sign in again.");
+        // Clear the session for this auth method
+        sessionStore.clearSession(authMethod);
+      } else if (errorMessage.includes("Failed to fetch user data")) {
+        console.log("🚀 [onContinue] Detected fetch error");
+        toast.error("Failed to fetch your data. Please try again.");
+      } else if (errorMessage.includes("Failed to get")) {
+        console.log("🚀 [onContinue] Detected 'Failed to get' error");
+        toast.error(errorMessage);
+      } else {
+        console.log("🚀 [onContinue] Generic error");
+        toast.error("Failed to issue credential. Please try again.");
+      }
     } finally {
+      console.log("🚀 [onContinue] Cleanup - setting loading to false");
       setIsWidgetLoading(false);
     }
   };
@@ -165,7 +213,7 @@ export function IssuanceModal() {
 
   return (
     <div className="flex flex-col gap-4 items-center">
-      <div className="text-2xl font-bold">{getHeadline()}</div>
+      <div className="text-2xl font-bold">{getHeadline(authMethod)}</div>
 
       {isError ? (
         <div className="w-full max-w-[420px] text-sm text-destructive text-center">

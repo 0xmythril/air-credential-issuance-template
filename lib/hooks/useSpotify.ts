@@ -79,10 +79,19 @@ export const useSpotify = (): UseSpotifyReturn => {
   }, [accessToken]);
 
   const getCurrentUser = async (): Promise<SpotifyUser | null> => {
-    if (!spotifyApi) return null;
+    console.log("🎵 [useSpotify] getCurrentUser called");
+    console.log("🎵 [useSpotify] spotifyApi exists:", !!spotifyApi);
+    console.log("🎵 [useSpotify] accessToken exists:", !!accessToken);
+    
+    if (!spotifyApi) {
+      console.log("🎵 [useSpotify] No Spotify API instance, returning null");
+      return null;
+    }
     
     try {
+      console.log("🎵 [useSpotify] Calling Spotify API currentUser.profile()...");
       const userProfile = await spotifyApi.currentUser.profile();
+      console.log("🎵 [useSpotify] ✅ Successfully fetched user profile:", userProfile);
       return {
         id: userProfile.id,
         display_name: userProfile.display_name,
@@ -92,8 +101,10 @@ export const useSpotify = (): UseSpotifyReturn => {
         country: userProfile.country,
       };
     } catch (error) {
-      console.error("Error fetching current user:", error);
-      return null;
+      console.error("🎵 [useSpotify] ❌ Error fetching current user:", error);
+      
+      // Re-throw the error so it can be caught in the auth handler
+      throw error;
     }
   };
 

@@ -1,18 +1,40 @@
 # AIR Credential Issuance Template
 
-A modern, flexible template for issuing verifiable credentials using AIR Kit. Supports multiple authentication methods including crypto wallets, AIR Kit user sessions, and third-party OAuth providers (Spotify, etc.).
+A modern, flexible template for issuing verifiable credentials using AIR Kit. Supports multiple authentication methods including crypto wallets, AIR Kit user sessions, and third-party OAuth providers (Spotify, Twitter, Discord).
 
 ## 🚀 Quick Start
 
-This template features a **modular authentication system** supporting multiple methods:
+This template features a **route-based authentication system** - access different credential types via URL routes:
+
+```bash
+# 🎵 Spotify Music Taste Credentials
+http://127.0.0.1:3000/spotify
+
+# 𝕏 Twitter Profile Credentials
+http://127.0.0.1:3000/twitter
+
+# 💬 Discord Community Credentials
+http://127.0.0.1:3000/discord
+
+# 🔗 Wallet/Web3 Credentials
+http://127.0.0.1:3000/ethos  # or /wallet
+
+# 🆔 AIR Kit Credentials
+http://127.0.0.1:3000/airkit
+```
+
+### Supported Authentication Methods
 
 - **🔗 Crypto Wallet** - Connect via MetaMask, WalletConnect, etc.
 - **🆔 AIR Kit User ID** - Direct AIR Kit authentication  
-- **🎵 Spotify OAuth** - Authenticate with Spotify and issue music taste credentials
-- **𝕏 Twitter/X OAuth** - Authenticate with Twitter and issue profile credentials
-- **🔧 Custom OAuth** - Easily extensible for Facebook, GitHub, and more
+- **🎵 Spotify OAuth** - Music taste credentials (top artists, genres, tracks)
+- **𝕏 Twitter/X OAuth** - Social profile credentials (followers, verification)
+- **💬 Discord OAuth** - Community credentials (servers, connections, Nitro status)
+- **🔧 Extensible** - Easy to add Facebook, GitHub, Google, and more
 
-> **✨ New**: [Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md) - Easy to extend with new providers!
+> **✨ New**: [Route-Based Authentication](docs/ROUTE_BASED_AUTH.md) - One deployment, multiple credential types!
+
+> **🎯 Quick Start**: [Route Setup Guide](docs/QUICK_START_ROUTES.md) - Get started in 5 minutes!
 
 > **📚 Need detailed setup instructions?** See the [Documentation](#-documentation) section below or check the [`docs/`](docs/) folder for comprehensive guides.
 
@@ -220,15 +242,17 @@ This project uses Shadcn UI for a customizable design system. Refer to the [Shad
 ## 📚 Documentation
 
 ### Quick Reference
+- **Route-Based Auth**: See [Quick Start Routes](docs/QUICK_START_ROUTES.md) - Get started in 5 minutes!
 - **Authentication Setup**: See [Authentication Methods](#authentication-methods) section above
 - **Environment Variables**: See [Environment Variables](#environment-variables) section above
-- **Spotify Integration**: See [Spotify Setup Guide](docs/SPOTIFY_SETUP.md)
 
 ### Detailed Documentation
 For comprehensive guides and detailed setup instructions, see the [`docs/`](docs/) folder:
 
 - **[📚 Documentation Index](docs/README.md)** - Complete documentation overview
-- **[🔧 Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md)** - **NEW!** Extensible auth system
+- **[🚀 Quick Start Routes](docs/QUICK_START_ROUTES.md)** - **NEW!** Route-based authentication guide
+- **[🔀 Route-Based Authentication](docs/ROUTE_BASED_AUTH.md)** - **NEW!** Multiple credential types via URL routes
+- **[🔧 Modular Authentication System](docs/MODULAR_AUTH_SYSTEM.md)** - Extensible auth system architecture
 - **[🔧 Authentication Setup](docs/AUTHENTICATION_SETUP.md)** - Setup for all authentication methods
 - **[🎵 Spotify Integration](docs/SPOTIFY_SETUP.md)** - Spotify OAuth setup and configuration
 - **[𝕏 Twitter Integration](docs/TWITTER_SETUP.md)** - Twitter OAuth setup and configuration

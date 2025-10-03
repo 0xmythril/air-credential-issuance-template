@@ -18,6 +18,7 @@ import { env, MocaChain } from "../env";
 import { useSession } from "../hooks/useSession";
 import { AirkitProvider } from "./AirkitProvider";
 import { ErrorHandler } from "./ErrorHandler";
+import { AuthMethodProvider, useAuthMethod } from "../contexts/AuthMethodContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,14 +27,8 @@ const queryClient = new QueryClient({
     },
   },
 });
-export const Providers: React.FC<{
-  children: React.ReactNode;
-}> = ({ children }) => {
+function ProvidersInner({ children }: { children: React.ReactNode }) {
   const { accessToken, setAccessToken } = useSession();
-  const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
-  const isTwitterLogin = env.NEXT_PUBLIC_AUTH_METHOD === "twitter";
-  const isDiscordLogin = env.NEXT_PUBLIC_AUTH_METHOD === "discord";
-  const needsSessionProvider = isSpotifyLogin || isTwitterLogin || isDiscordLogin;
 
   const authenticationAdapter = useMemo(
     () =>
@@ -118,7 +113,7 @@ export const Providers: React.FC<{
     });
   }, []);
 
-  const content = (
+  return (
     <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <ErrorHandler>
@@ -134,7 +129,11 @@ export const Providers: React.FC<{
       </QueryClientProvider>
     </WagmiProvider>
   );
+}
 
+export const Providers: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   return (
     <ThemeProvider
       attribute="class"
@@ -144,11 +143,12 @@ export const Providers: React.FC<{
         env.NEXT_PUBLIC_THEME !== "system" ? env.NEXT_PUBLIC_THEME : undefined
       }
     >
-      {needsSessionProvider ? (
-        <SessionProvider>{content}</SessionProvider>
-      ) : (
-        content
-      )}
+      <AuthMethodProvider>
+        {/* Always wrap with SessionProvider for multi-session support */}
+        <SessionProvider>
+          <ProvidersInner>{children}</ProvidersInner>
+        </SessionProvider>
+      </AuthMethodProvider>
     </ThemeProvider>
   );
 };

@@ -71,11 +71,25 @@ export const authOptions: NextAuthOptions = {
         
         // Store Twitter-specific user data
         if (account.provider === 'twitter' && profile) {
+          console.log("🐦 [NextAuth JWT] Twitter profile received:", profile);
+          console.log("🐦 [NextAuth JWT] Twitter profile keys:", Object.keys(profile));
+          
           const twitterProfile = profile as Record<string, unknown>;
           const data = twitterProfile.data as Record<string, unknown>;
+          
+          console.log("🐦 [NextAuth JWT] Twitter profile.data:", data);
+          
           if (data) {
             token.twitterId = data.id as string;
             token.twitterUsername = data.username as string;
+            console.log("🐦 [NextAuth JWT] Stored twitterId:", token.twitterId);
+            console.log("🐦 [NextAuth JWT] Stored twitterUsername:", token.twitterUsername);
+          } else {
+            // Fallback: check if data is at root level
+            token.twitterId = twitterProfile.id as string;
+            token.twitterUsername = twitterProfile.username as string;
+            console.log("🐦 [NextAuth JWT] Fallback - Stored twitterId:", token.twitterId);
+            console.log("🐦 [NextAuth JWT] Fallback - Stored twitterUsername:", token.twitterUsername);
           }
         }
         
@@ -96,9 +110,17 @@ export const authOptions: NextAuthOptions = {
       
       // Add provider-specific data to session
       if (token.provider === 'twitter') {
+        console.log("🐦 [NextAuth Session] Processing Twitter session");
+        console.log("🐦 [NextAuth Session] twitterId from token:", token.twitterId);
+        console.log("🐦 [NextAuth Session] twitterUsername from token:", token.twitterUsername);
+        
         if (session.user) {
           (session.user as Record<string, unknown>).id = token.twitterId as string;
+          (session.user as Record<string, unknown>).twitterId = token.twitterId as string;
           (session.user as Record<string, unknown>).username = token.twitterUsername as string;
+          (session.user as Record<string, unknown>).twitterUsername = token.twitterUsername as string;
+          
+          console.log("🐦 [NextAuth Session] Updated session.user:", session.user);
         }
       }
       

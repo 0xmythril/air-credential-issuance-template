@@ -1,4 +1,5 @@
 import { useSession } from "@/lib/hooks/useSession";
+import { useAuthMethod } from "@/lib/contexts/AuthMethodContext";
 import { axiosInstance } from "@/lib/utils/axios";
 import { useQuery } from "@tanstack/react-query";
 
@@ -12,10 +13,13 @@ const fetchUserData = async () => {
 };
 
 export const useUserData = () => {
-  const { accessToken } = useSession();
+  const { authMethod } = useAuthMethod();
+  const sessionStore = useSession();
+  const currentSession = sessionStore.getSession(authMethod);
+  const accessToken = currentSession.accessToken;
 
   return useQuery({
-    queryKey: ["user-data", accessToken],
+    queryKey: ["user-data", authMethod, accessToken],
     queryFn: fetchUserData,
     enabled: !!accessToken,
     staleTime: 5 * 60 * 1000, // 5 minutes - cache the data for 5 minutes

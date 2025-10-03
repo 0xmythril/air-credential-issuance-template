@@ -41,6 +41,13 @@ export const useAirProvider = (): AirProviderInfo => {
 
     const fetchProviderInfo = async () => {
       try {
+        // Only fetch provider info if user is logged in
+        if (!airService.isLoggedIn) {
+          setAddress(null);
+          setChainId(null);
+          return;
+        }
+
         // Get the provider from AIR Services
         provider = airService.getProvider();
         

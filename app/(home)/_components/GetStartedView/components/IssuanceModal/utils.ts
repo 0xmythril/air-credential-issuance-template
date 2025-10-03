@@ -1,4 +1,5 @@
 import { env } from "@/lib/env";
+import type { AuthMethod } from "@/lib/contexts/AuthMethodContext";
 import type { SpotifyUserData, SpotifyArtist, SpotifyTrack, MusicTasteSummary, CredentialData } from "./types";
 
 /**
@@ -98,10 +99,11 @@ export const transformForCredential = (
 /**
  * Get dynamic headline based on auth method
  */
-export const getHeadline = (): string => {
-  if (env.NEXT_PUBLIC_HEADLINE) return env.NEXT_PUBLIC_HEADLINE;
+export const getHeadline = (authMethod: AuthMethod): string => {
+  if (env.NEXT_PUBLIC_HEADLINE && env.NEXT_PUBLIC_HEADLINE.trim() !== "") {
+    return env.NEXT_PUBLIC_HEADLINE;
+  }
 
-  const authMethod = env.NEXT_PUBLIC_AUTH_METHOD;
   switch (authMethod) {
     case "spotify":
       return "Store your Music Taste Securely on Moca Network";
@@ -111,6 +113,8 @@ export const getHeadline = (): string => {
       return "Store your Discord Profile Securely on Moca Network";
     case "wallet":
       return "Store your Reputation Securely on Moca Network";
+    case "airkit":
+      return "Store your Data Securely on Moca Network";
     default:
       return "Store your Data Securely on Moca Network";
   }
