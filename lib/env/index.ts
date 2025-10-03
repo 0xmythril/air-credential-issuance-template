@@ -40,6 +40,10 @@ export const env = createEnv({
     NEXT_PUBLIC_MOCA_CHAIN: z.enum(MocaChain),
     NEXT_PUBLIC_THEME: z.enum(["light", "dark", "system"]),
     NEXT_PUBLIC_SPOTIFY_CLIENT_ID: z.string().optional(),
+    NEXT_PUBLIC_ANNOUNCEMENT_TITLE: z.string().optional(),
+    NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE: z.string().optional(),
+    NEXT_PUBLIC_ANNOUNCEMENT_ID: z.string().optional(),
+    NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS: z.coerce.number().optional(),
   },
   runtimeEnv: {
     PARTNER_PRIVATE_KEY: process.env.PARTNER_PRIVATE_KEY,
@@ -69,6 +73,10 @@ export const env = createEnv({
     SIGNING_ALGORITHM: process.env.SIGNING_ALGORITHM,
     NEXT_PUBLIC_THEME: process.env.NEXT_PUBLIC_THEME,
     NEXT_PUBLIC_SPOTIFY_CLIENT_ID: process.env.NEXT_PUBLIC_SPOTIFY_CLIENT_ID,
+    NEXT_PUBLIC_ANNOUNCEMENT_TITLE: process.env.NEXT_PUBLIC_ANNOUNCEMENT_TITLE,
+    NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE: process.env.NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE,
+    NEXT_PUBLIC_ANNOUNCEMENT_ID: process.env.NEXT_PUBLIC_ANNOUNCEMENT_ID,
+    NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS: process.env.NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS,
   },
 });
 

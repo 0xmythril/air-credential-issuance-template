@@ -85,6 +85,8 @@ export const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                aria-current={pathname === "/" ? "page" : undefined}
+                className={pathname === "/" ? "bg-accent/50" : undefined}
               >
                 Home
               </Button>
@@ -93,6 +95,8 @@ export const Header = () => {
               <Button
                 variant="ghost"
                 size="sm"
+                aria-current={pathname === "/explore" ? "page" : undefined}
+                className={pathname === "/explore" ? "bg-accent/50" : undefined}
               >
                 Explore
               </Button>

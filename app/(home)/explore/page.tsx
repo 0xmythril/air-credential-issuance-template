@@ -22,6 +22,7 @@ import {
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpDown, Search, Filter } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { EmptyState } from "@/components/common/States";
 
 interface CredentialSchema {
   id: string;
@@ -252,8 +253,11 @@ export default function ExplorePage() {
                 <TableBody>
                   {filteredAndSortedSchemas.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center py-12 text-muted-foreground">
-                        No credentials found matching your filters.
+                      <TableCell colSpan={5} className="py-12">
+                        <EmptyState
+                          title="No credentials found"
+                          description="Try adjusting your search or filters."
+                        />
                       </TableCell>
                     </TableRow>
                   ) : (

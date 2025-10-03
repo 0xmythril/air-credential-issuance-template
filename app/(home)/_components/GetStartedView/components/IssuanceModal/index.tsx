@@ -11,6 +11,7 @@ import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
 import { toast } from "sonner";
+import { LoadingState, ErrorState } from "@/components/common/States";
 import { useState } from "react";
 import { ErrorShelf } from "@/components/common/ErrorShelf";
 import { normalizeError, createCorrelationId, type NormalizedError } from "@/lib/utils/error-utils";
@@ -292,9 +293,15 @@ export function IssuanceModal() {
 
       {/* Action button */}
       {isError ? (
-        <Button className="w-full max-w-[200px]" size="lg" onClick={() => refetch()}>
-          Retry
-        </Button>
+        <ErrorState
+          title="Failed to load user data"
+          description="Please try again."
+          action={
+            <Button className="w-full max-w-[200px]" size="lg" variant="outline" onClick={() => refetch()}>
+              Retry
+            </Button>
+          }
+        />
       ) : (
         <Button
           className="w-full max-w-[200px]"
