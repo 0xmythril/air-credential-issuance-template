@@ -32,13 +32,13 @@ export const transformForCredential = (
   // Handle Twitter data - use transformer registry
   if (data.user_type === "twitter") {
     console.log('🔄 [transformForCredential] Detected Twitter data, using TwitterDataTransformer');
-    return transformerRegistry.transform('twitter', data) as CredentialData;
+    return transformerRegistry.transform('twitter', data as Record<string, unknown>) as CredentialData;
   }
 
   // Handle Discord data - use transformer registry
   if (data.user_type === "discord") {
     console.log('🔄 [transformForCredential] Detected Discord data, using DiscordDataTransformer');
-    return transformerRegistry.transform('discord', data) as CredentialData;
+    return transformerRegistry.transform('discord', data as Record<string, unknown>) as CredentialData;
   }
 
   // Handle Spotify data
