@@ -49,3 +49,13 @@ next-env.d.ts
 
 # custom notes
 .notes
+
+
+# playwright
+# Playwright artifacts
+/playwright-report
+/test-results
+/blob-report
+/traces
+/videos
+/tests/.auth
