@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowUpDown, Search, Filter } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface CredentialSchema {
   id: string;
@@ -260,9 +261,9 @@ export default function ExplorePage() {
                       <TableRow key={schema.id} className="cursor-pointer hover:bg-muted/50">
                         <TableCell className="font-medium">{schema.name}</TableCell>
                         <TableCell>
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${schema.color}`}>
+                          <Badge className={schema.color} variant="outline">
                             {schema.dataSource}
-                          </span>
+                          </Badge>
                         </TableCell>
                         <TableCell>
                           <div className="flex flex-wrap gap-1">

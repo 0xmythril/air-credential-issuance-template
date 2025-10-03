@@ -11,8 +11,14 @@ import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
 import { toast } from "sonner";
+import { useState } from "react";
+import { ErrorShelf } from "@/components/common/ErrorShelf";
+import { normalizeError, createCorrelationId, type NormalizedError } from "@/lib/utils/error-utils";
 
 export function IssuanceModal() {
+  const [lastError, setLastError] = useState<NormalizedError | null>(null);
+  const [retryCount, setRetryCount] = useState(0);
+  const correlationBase = createCorrelationId();
   const { authMethod } = useAuthMethod();
   const { airService, isInitialized } = useAirkit();
   const { isConnected } = useAccount();
@@ -49,6 +55,7 @@ export function IssuanceModal() {
     console.log("🚀 [onContinue] Access token exists:", !!accessToken);
     
     setIsWidgetLoading(true);
+    setLastError(null);
     try {
       // Handle authentication
       console.log("🚀 [onContinue] Calling handleAuth()...");
@@ -131,36 +138,35 @@ export function IssuanceModal() {
       });
     } catch (error) {
       console.error("🚀 [onContinue] ❌ Error in credential issuance process:", error);
-      
-      // Show user-friendly error message
-      const errorMessage = error instanceof Error ? error.message : "An error occurred";
-      console.log("🚀 [onContinue] Error message:", errorMessage);
-      
-      if (errorMessage.includes("session expired") || errorMessage.includes("Session expired")) {
-        // Session expired - show clear message
-        console.log("🚀 [onContinue] Detected session expired error, clearing session");
-        toast.error(errorMessage);
-        // Clear the session for this auth method
+      const normalized = normalizeError(error, {
+        correlationId: `${correlationBase}-${retryCount}`,
+        context: {
+          authMethod,
+          hasAccessToken: !!accessToken,
+          isInitialized,
+        },
+      });
+      setLastError(normalized);
+      // Keep legacy toasts for quick feedback
+      if (normalized.type === "auth") {
+        toast.error("Session issue. Please sign in again.");
         sessionStore.clearSession(authMethod);
-      } else if (errorMessage.includes("Bad or expired token")) {
-        console.log("🚀 [onContinue] Detected bad/expired token error, clearing session");
-        toast.error("Session expired. Please sign in again.");
-        // Clear the session for this auth method
-        sessionStore.clearSession(authMethod);
-      } else if (errorMessage.includes("Failed to fetch user data")) {
-        console.log("🚀 [onContinue] Detected fetch error");
-        toast.error("Failed to fetch your data. Please try again.");
-      } else if (errorMessage.includes("Failed to get")) {
-        console.log("🚀 [onContinue] Detected 'Failed to get' error");
-        toast.error(errorMessage);
+      } else if (normalized.type === "network" || normalized.type === "timeout") {
+        toast.error("Network error. Please try again.");
+      } else if (normalized.type === "rate_limit") {
+        toast.error("Rate limited. Please wait and retry.");
       } else {
-        console.log("🚀 [onContinue] Generic error");
-        toast.error("Failed to issue credential. Please try again.");
+        toast.error("Failed to issue credential. See details below.");
       }
     } finally {
       console.log("🚀 [onContinue] Cleanup - setting loading to false");
       setIsWidgetLoading(false);
     }
+  };
+
+  const handleRetry = async () => {
+    setRetryCount((c) => c + 1);
+    await onContinue();
   };
 
   // Computed values
@@ -214,6 +220,16 @@ export function IssuanceModal() {
   return (
     <div className="flex flex-col gap-4 items-center">
       <div className="text-2xl font-bold">{getHeadline(authMethod)}</div>
+
+      {/* Error shelf */}
+      <ErrorShelf
+        error={lastError}
+        onRetry={lastError?.retryable ? handleRetry : undefined}
+        onClear={() => setLastError(null)}
+        className="w-full"
+        supportEmail={undefined}
+        title="We hit a snag during issuance"
+      />
 
       {isError ? (
         <div className="w-full max-w-[420px] text-sm text-destructive text-center">
