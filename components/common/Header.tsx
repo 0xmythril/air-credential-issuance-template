@@ -12,6 +12,7 @@ import { Search, Menu, Home } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { SessionsSidebar } from "./SessionsSidebar";
+import { ThemeToggle } from "./ThemeToggle";
 
 // Safe wrappers to prevent SessionProvider errors
 function useSafeSpotify() {
@@ -101,8 +102,9 @@ export const Header = () => {
           {/* Spacer right */}
           <div className="flex-1" />
           
-          {/* Right side - Account Dashboard Button */}
+          {/* Right side - Theme + Account Dashboard Button */}
           <div className="flex items-center gap-2 mr-4">
+            <ThemeToggle />
             {hasConnections && (
               <Button
                 variant="outline"

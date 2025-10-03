@@ -305,6 +305,12 @@ export function IssuanceModal() {
           {buttonText}
         </Button>
       )}
+
+      {/* Trust note */}
+      <div className="text-xs text-muted-foreground max-w-[420px] text-center">
+        We only store the fields you see above as a verifiable credential on Moca.
+        You can revoke access later.
+      </div>
     </div>
   );
 }

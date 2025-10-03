@@ -304,8 +304,8 @@ export default function ExplorePage() {
         <Card>
           <CardContent className="pt-6">
             <p className="text-sm text-muted-foreground">
-              All credentials are securely stored on the Moca blockchain using AIR Kit. 
-              Click &ldquo;Issue Credential&rdquo; to authenticate with the respective platform and create your verifiable credential.
+              Credentials are stored as tamper-proof records on the Moca Network. Only the listed
+              fields are saved. You can revoke at any time.
             </p>
           </CardContent>
         </Card>

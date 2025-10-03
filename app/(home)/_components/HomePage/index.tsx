@@ -86,8 +86,8 @@ export function HomePage() {
             Choose Your Credential Type
           </h1>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Select the credential you want to issue. Each type captures different aspects of your 
-            digital identity and stores them securely on the Moca Network.
+            Issue verifiable credentials about your social profiles, music taste, and wallet.
+            Takes ~30 seconds. You can revoke at any time.
           </p>
         </div>
 
