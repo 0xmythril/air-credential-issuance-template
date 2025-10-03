@@ -1,310 +1,279 @@
-# Authentication Methods Setup Guide
+# Authentication Setup Guide
 
-This guide covers setup for different authentication methods supported by the AIR Credential Issuance Template.
+This guide covers how to set up different authentication methods in the AIR Credential Issuance Template.
 
-## 🔗 Wallet Authentication (Default)
+## Route-Based Authentication
 
-**Use Case**: Web3 applications, DeFi, NFT projects  
-**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=wallet`
+The template uses **route-based authentication**. Each URL route automatically determines the authentication method:
 
-### Setup Steps
+- `/spotify` → Spotify OAuth
+- `/twitter` → Twitter OAuth
+- `/discord` → Discord OAuth
+- `/ethos` or `/wallet` → Wallet Connect
+- `/airkit` → AIR Kit authentication
 
-1. **Configure Reown (WalletConnect)**
+No configuration needed - just navigate to the route!
+
+## Authentication Method Details
+
+### 1. Wallet Authentication (Ethos)
+
+**Route**: `/ethos` or `/wallet`
+
+**Description**: Web3 wallet authentication using RainbowKit and WalletConnect.
+
+**Setup Steps**:
+1. Get a Reown (formerly WalletConnect) Project ID from https://cloud.reown.com/
+2. Add to `.env.local`:
    ```bash
-   NEXT_PUBLIC_REOWN_PROJECT_ID=your_reown_project_id
+   NEXT_PUBLIC_REOWN_PROJECT_ID="your_project_id"
+   ```
+3. *(Optional)* Set wallet-specific program ID:
+   ```bash
+   NEXT_PUBLIC_ETHOS_PROGRAM_ID="your_wallet_program_id"
    ```
 
-2. **Required Environment Variables**
-   ```bash
-   NEXT_PUBLIC_AUTH_METHOD=wallet
-   NEXT_PUBLIC_REOWN_PROJECT_ID=your_reown_project_id
-   ```
-
-3. **User Flow**
-   - User clicks "Connect Wallet"
-   - WalletConnect modal appears
-   - User connects via MetaMask, WalletConnect, etc.
-   - Wallet address becomes user identifier
+**User Flow**:
+- User visits `/ethos`
+- Clicks "Connect Wallet"
+- Selects wallet (MetaMask, Coinbase, etc.)
+- Signs message to authenticate
+- Credential is issued
 
 ---
 
-## 🆔 AIR Kit Authentication
+### 2. AIR Kit Authentication
 
-**Use Case**: Direct AIR Kit integration, existing AIR Kit users  
-**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=airkit`
+**Route**: `/airkit`
 
-### Setup Steps
+**Description**: Direct authentication using AIR Kit's built-in authentication.
 
-1. **No additional configuration required**
-   - Uses AIR Kit's built-in authentication
-   - User ID is managed by AIR Kit
-
-2. **Required Environment Variables**
+**Setup Steps**:
+1. Configure AIR Kit credentials:
    ```bash
-   NEXT_PUBLIC_AUTH_METHOD=airkit
+   NEXT_PUBLIC_PARTNER_ID="your_partner_id"
+   NEXT_PUBLIC_ISSUER_DID="your_issuer_did"
+   NEXT_PUBLIC_ISSUE_PROGRAM_ID="your_program_id"
+   ```
+2. *(Optional)* Set AIR Kit-specific program ID:
+   ```bash
+   NEXT_PUBLIC_AIRKIT_PROGRAM_ID="your_airkit_program_id"
    ```
 
-3. **User Flow**
-   - User authenticates directly with AIR Kit
-   - AIR Kit user ID becomes identifier
-   - Seamless integration with AIR Kit ecosystem
+**User Flow**:
+- User visits `/airkit`
+- AIR Kit widget handles authentication
+- User logs in with AIR account
+- Credential is issued
 
 ---
 
-## 🎵 Spotify Authentication
+### 3. Spotify Authentication
 
-**Use Case**: Music applications, entertainment platforms, music taste credentials  
-**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=spotify`
+**Route**: `/spotify`
 
-### Setup Steps
+**Description**: OAuth authentication with Spotify to access user's music data.
 
-1. **Create Spotify App**
-   - Go to [Spotify Developer Dashboard](https://developer.spotify.com/dashboard)
-   - Create new app
-   - Set redirect URI: `http://127.0.0.1:3000/api/auth/callback/spotify` (development)
-   - Set redirect URI: `https://yourapp.com/api/auth/callback/spotify` (production)
+**Setup Steps**:
 
-2. **Required Environment Variables**
+1. **Create Spotify App**:
+   - Go to https://developer.spotify.com/dashboard
+   - Create a new app
+   - Add redirect URI: `http://127.0.0.1:3000/api/auth/callback/spotify` (for local dev)
+   - For production, add: `https://yourdomain.com/api/auth/callback/spotify`
+
+2. **Configure Environment Variables**:
    ```bash
-   NEXT_PUBLIC_AUTH_METHOD=spotify
-   SPOTIFY_CLIENT_ID=your_spotify_client_id
-   SPOTIFY_CLIENT_SECRET=your_spotify_client_secret
-   NEXT_PUBLIC_SPOTIFY_CLIENT_ID=your_spotify_client_id
-   NEXTAUTH_SECRET=your_random_secret
-   NEXTAUTH_URL=http://127.0.0.1:3000  # Development
+   # Server-side OAuth
+   SPOTIFY_CLIENT_ID="your_client_id"
+   SPOTIFY_CLIENT_SECRET="your_client_secret"
+   
+   # Client-side API calls
+   NEXT_PUBLIC_SPOTIFY_CLIENT_ID="your_client_id"
+   
+   # NextAuth
+   NEXTAUTH_SECRET="generate_random_secret"
+   NEXTAUTH_URL="http://127.0.0.1:3000"  # Use 127.0.0.1 for Spotify
    ```
 
-3. **User Flow**
-   - User clicks "Sign in with Spotify"
-   - Redirects to Spotify authorization
-   - User grants permissions
-   - Spotify user ID becomes identifier
-   - Music data is fetched for credential content
+3. ***(Optional)* Set Spotify-specific program ID**:
+   ```bash
+   NEXT_PUBLIC_SPOTIFY_PROGRAM_ID="your_spotify_program_id"
+   ```
 
-### Spotify Scopes Required
-- `user-read-email` - User's email address
-- `user-read-private` - User's subscription details
-- `user-top-read` - User's top artists and tracks
-- `user-follow-read` - User's followed artists
-- `playlist-read-private` - User's private playlists
-- `user-read-recently-played` - User's recently played tracks
+**User Flow**:
+- User visits `/spotify`
+- Clicks "Sign in with Spotify"
+- Redirected to Spotify OAuth
+- Grants permissions
+- Returns to app with access token
+- Spotify data fetched
+- Credential is issued
+
+**Data Retrieved**: User profile, top artists, top tracks, followed artists, playlists.
 
 ---
 
-## 𝕏 Twitter/X Authentication
+### 4. Twitter Authentication
 
-**Use Case**: Social media applications, profile credentials, Twitter analytics  
-**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=twitter`
+**Route**: `/twitter`
 
-### Setup Steps
+**Description**: OAuth 2.0 authentication with Twitter to access user's profile data.
 
-1. **Create Twitter App**
-   - Go to [Twitter Developer Portal](https://developer.twitter.com/en/portal/dashboard)
-   - Create new project and app
-   - Set up OAuth 2.0 authentication
-   - Set redirect URI: `http://127.0.0.1:3000/api/auth/callback/twitter` (development)
-   - Set redirect URI: `https://yourapp.com/api/auth/callback/twitter` (production)
+**Setup Steps**:
 
-2. **Required Environment Variables**
+1. **Create Twitter App**:
+   - Go to https://developer.twitter.com/en/portal/dashboard
+   - Create a new app (OAuth 2.0 type)
+   - Add redirect URI: `http://127.0.0.1:3000/api/auth/callback/twitter`
+   - For production, add: `https://yourdomain.com/api/auth/callback/twitter`
+   - Enable OAuth 2.0 and request scopes: `tweet.read`, `users.read`, `follows.read`
+
+2. **Configure Environment Variables**:
    ```bash
-   NEXT_PUBLIC_AUTH_METHOD=twitter
-   TWITTER_CLIENT_ID=your_twitter_client_id
-   TWITTER_CLIENT_SECRET=your_twitter_client_secret
-   NEXTAUTH_SECRET=your_random_secret
-   NEXTAUTH_URL=http://127.0.0.1:3000  # Development
+   TWITTER_CLIENT_ID="your_client_id"
+   TWITTER_CLIENT_SECRET="your_client_secret"
+   
+   # NextAuth
+   NEXTAUTH_SECRET="generate_random_secret"
+   NEXTAUTH_URL="http://127.0.0.1:3000"
    ```
 
-3. **User Flow**
-   - User clicks "Sign in with Twitter"
-   - Redirects to Twitter authorization
-   - User grants permissions
-   - Twitter user ID becomes identifier
-   - Profile data is fetched for credential content
+3. ***(Optional)* Set Twitter-specific program ID**:
+   ```bash
+   NEXT_PUBLIC_TWITTER_PROGRAM_ID="your_twitter_program_id"
+   ```
 
-### Twitter API Scopes Required
-- `tweet.read` - Read user's tweets
-- `users.read` - Read user's profile information
-- `follows.read` - Read user's followers and following
+**User Flow**:
+- User visits `/twitter`
+- Clicks "Sign in with Twitter"
+- Redirected to Twitter OAuth
+- Grants permissions
+- Returns to app with access token
+- Twitter data fetched
+- Credential is issued
 
-> **📚 Detailed Guide**: See [TWITTER_SETUP.md](./TWITTER_SETUP.md) for complete Twitter integration setup.
+**Data Retrieved**: User ID, username, display name, bio, follower count, following count, tweet count, verified status.
 
 ---
 
-## 🔧 Custom OAuth Authentication
+### 5. Discord Authentication
 
-**Use Case**: Other OAuth providers (Google, GitHub, Facebook, etc.)  
-**Configuration**: `NEXT_PUBLIC_AUTH_METHOD=custom`
+**Route**: `/discord`
 
-### Setup Steps
+**Description**: OAuth 2.0 authentication with Discord to access user's profile and guild data.
 
-1. **Choose OAuth Provider**
-   - Google OAuth
-   - GitHub OAuth
-   - Twitter OAuth
-   - Custom OAuth provider
+**Setup Steps**:
 
-2. **Implement Provider**
-   - Add provider to `lib/auth.ts`
-   - Configure scopes and permissions
-   - Set up redirect URIs
+1. **Create Discord App**:
+   - Go to https://discord.com/developers/applications
+   - Create a new application
+   - Navigate to OAuth2 settings
+   - Add redirect URI: `http://127.0.0.1:3000/api/auth/callback/discord`
+   - For production, add: `https://yourdomain.com/api/auth/callback/discord`
+   - Request scopes: `identify`, `email`, `guilds`, `guilds.members.read`
 
-3. **Required Environment Variables**
+2. **Configure Environment Variables**:
    ```bash
-   NEXT_PUBLIC_AUTH_METHOD=custom
-   # Provider-specific variables
-   PROVIDER_CLIENT_ID=your_provider_client_id
-   PROVIDER_CLIENT_SECRET=your_provider_client_secret
-   NEXTAUTH_SECRET=your_random_secret
-   NEXTAUTH_URL=http://127.0.0.1:3000
+   DISCORD_CLIENT_ID="your_client_id"
+   DISCORD_CLIENT_SECRET="your_client_secret"
+   
+   # NextAuth
+   NEXTAUTH_SECRET="generate_random_secret"
+   NEXTAUTH_URL="http://127.0.0.1:3000"
    ```
 
-4. **User Flow**
-   - User clicks "Sign in with [Provider]"
-   - Redirects to provider authorization
-   - User grants permissions
-   - Provider user ID becomes identifier
+3. ***(Optional)* Set Discord-specific program ID**:
+   ```bash
+   NEXT_PUBLIC_DISCORD_PROGRAM_ID="your_discord_program_id"
+   ```
+
+**User Flow**:
+- User visits `/discord`
+- Clicks "Sign in with Discord"
+- Redirected to Discord OAuth
+- Grants permissions
+- Returns to app with access token
+- Discord data fetched
+- Credential is issued
+
+**Data Retrieved**: User ID, username, discriminator, email, avatar, banner, accent color, locale, verified status, premium type, guilds.
 
 ---
 
-## 🔄 Switching Between Methods
+## Route-Specific Issuance Programs
 
-### Development
-Change `NEXT_PUBLIC_AUTH_METHOD` in your `.env.local`:
+Each route can be configured to use its own issuance program via environment variables:
 
 ```bash
-# For wallet authentication
-NEXT_PUBLIC_AUTH_METHOD=wallet
-
-# For AIR Kit authentication  
-NEXT_PUBLIC_AUTH_METHOD=airkit
-
-# For Spotify authentication
-NEXT_PUBLIC_AUTH_METHOD=spotify
-
-# For Twitter authentication
-NEXT_PUBLIC_AUTH_METHOD=twitter
-
-# For custom OAuth
-NEXT_PUBLIC_AUTH_METHOD=custom
+# .env
+NEXT_PUBLIC_SPOTIFY_PROGRAM_ID="music_credential_v1"
+NEXT_PUBLIC_TWITTER_PROGRAM_ID="social_credential_v1"
+NEXT_PUBLIC_DISCORD_PROGRAM_ID="community_credential_v1"
 ```
 
-### Production
-Set the environment variable in your deployment platform:
+This allows each route to issue different credential types.
 
-- **Vercel**: Environment Variables in project settings
-- **Netlify**: Environment Variables in site settings
-- **Railway**: Environment Variables in service settings
-- **Docker**: Environment variables in docker-compose.yml
+**Priority**:
+1. Route-specific program ID (`NEXT_PUBLIC_SPOTIFY_PROGRAM_ID`, etc.)
+2. Global default (`NEXT_PUBLIC_ISSUE_PROGRAM_ID`)
 
----
-
-## 🛠️ Implementation Details
-
-### File Structure
-```
-lib/
-├── auth.ts              # NextAuth configuration
-├── hooks/
-│   ├── useSpotify.ts    # Spotify-specific hook
-│   └── useAirProvider.tsx # AIR Kit provider hook
-└── providers/
-    └── index.tsx        # Provider configuration
-
-app/(home)/
-├── api/auth/
-│   ├── spotify/         # Spotify auth endpoint
-│   └── [...nextauth]/   # NextAuth handlers
-└── _components/
-    └── GetStartedView/  # Authentication UI
-```
-
-### Key Components
-
-1. **Authentication Hook** (`lib/hooks/useSpotify.ts`)
-   - Manages Spotify session state
-   - Provides API access methods
-   - Handles token refresh
-
-2. **NextAuth Configuration** (`lib/auth.ts`)
-   - Spotify provider setup
-   - JWT token management
-   - Session callbacks
-
-3. **API Routes** (`app/(home)/api/auth/`)
-   - Custom authentication endpoints
-   - Token validation
-   - User data fetching
-
-4. **UI Components** (`app/(home)/_components/`)
-   - Authentication buttons
-   - User data display
-   - Credential issuance flow
+See [DYNAMIC_ISSUANCE_PROGRAMS.md](DYNAMIC_ISSUANCE_PROGRAMS.md) for more details.
 
 ---
 
-## 🔒 Security Considerations
+## Testing Authentication
 
-### Token Management
-- ✅ Secure token storage in JWTs
-- ✅ Token validation on all API calls
-- ✅ Automatic token refresh
-- ✅ Secure session management
-
-### Data Privacy
-- ✅ Minimal scope requests
-- ✅ User consent for data access
-- ✅ Secure data transmission
-- ✅ No sensitive data logging
-
-### Production Security
-- ✅ HTTPS enforcement
-- ✅ Secure redirect URIs
-- ✅ Environment variable protection
-- ✅ CORS configuration
-
----
-
-## 🚀 Deployment Checklist
-
-### Pre-deployment
-- [ ] Set production environment variables
-- [ ] Configure production redirect URIs
-- [ ] Update OAuth app settings
-- [ ] Test authentication flow
-- [ ] Verify credential issuance
-
-### Post-deployment
-- [ ] Update OAuth redirect URIs
-- [ ] Test production authentication
-- [ ] Monitor error logs
-- [ ] Verify credential storage
-- [ ] Test user flows
-
----
-
-## 🆘 Troubleshooting
+### Local Development
+1. Start the dev server: `pnpm dev`
+2. Navigate to desired route:
+   - `http://127.0.0.1:3000/spotify`
+   - `http://127.0.0.1:3000/twitter`
+   - `http://127.0.0.1:3000/discord`
+   - `http://127.0.0.1:3000/ethos`
+3. Follow authentication flow
+4. Check browser console for debug logs
 
 ### Common Issues
 
-1. **"Invalid redirect URI"**
-   - Check OAuth app redirect URI configuration
-   - Ensure development vs production URLs match
+**Spotify OAuth fails**:
+- Ensure `NEXTAUTH_URL="http://127.0.0.1:3000"` (not localhost)
+- Verify redirect URI matches exactly
 
-2. **"Client not found"**
-   - Verify client ID and secret are correct
-   - Check environment variable names
+**Twitter OAuth fails**:
+- Check OAuth 2.0 is enabled
+- Verify scopes are requested
+- Ensure redirect URI is correct
 
-3. **"Authentication failed"**
-   - Verify NEXTAUTH_SECRET is set
-   - Check NEXTAUTH_URL configuration
+**Discord OAuth fails**:
+- Check scopes are enabled
+- Verify redirect URI matches
+- Ensure bot is not required
 
-4. **"No user data"**
-   - User needs to grant required permissions
-   - Check API scopes and permissions
+**Wallet Connect fails**:
+- Verify `NEXT_PUBLIC_REOWN_PROJECT_ID` is set
+- Check wallet extension is installed
+- Try different wallet
 
-### Debug Mode
-Set `NODE_ENV=development` for detailed logging:
-- Authentication flow debugging
-- API call monitoring
-- Error tracking
-- Token validation logs
+---
+
+## Switching Between Methods
+
+Simply navigate to different routes - no code changes needed!
+
+```
+/spotify  → Spotify authentication
+/twitter  → Twitter authentication
+/discord  → Discord authentication
+/ethos    → Wallet authentication
+```
+
+The app automatically adapts the UI and authentication flow based on the route.
+
+---
+
+## Further Reading
+
+- [Route-Based Authentication Details](ROUTE_BASED_AUTH.md)
+- [Dynamic Issuance Programs](DYNAMIC_ISSUANCE_PROGRAMS.md)
+- [Development Guide](DEVELOPMENT_GUIDE.md)

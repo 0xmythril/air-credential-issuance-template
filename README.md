@@ -88,15 +88,17 @@ http://127.0.0.1:3000/airkit
 
 ### 2. Choose Your Authentication Method
 
-| Method | Identifier | Use Case | Configuration |
-|--------|------------|----------|---------------|
-| **🔗 Wallet** | Wallet Address | Web3 users, DeFi applications | `NEXT_PUBLIC_AUTH_METHOD=wallet` |
-| **🆔 AIR Kit** | AIR Kit User ID | Direct AIR Kit integration | `NEXT_PUBLIC_AUTH_METHOD=airkit` |
-| **🎵 Spotify** | Spotify User ID | Music applications, entertainment | `NEXT_PUBLIC_AUTH_METHOD=spotify` |
-| **𝕏 Twitter** | Twitter User ID | Social media credentials, profile data | `NEXT_PUBLIC_AUTH_METHOD=twitter` |
-| **🔧 Custom** | Your User ID | Custom OAuth providers | `NEXT_PUBLIC_AUTH_METHOD=custom` |
+The template supports **route-based authentication**. Each route automatically uses its corresponding authentication method:
 
-> **📚 Documentation**: See [docs/AUTHENTICATION_SETUP.md](docs/AUTHENTICATION_SETUP.md) for detailed setup guides for all authentication methods.
+| Method | Identifier | Use Case | Route |
+|--------|------------|----------|-------|
+| **🔗 Wallet** | Wallet Address | Web3 users, DeFi applications | `/ethos` or `/wallet` |
+| **🆔 AIR Kit** | AIR Kit User ID | Direct AIR Kit integration | `/airkit` |
+| **🎵 Spotify** | Spotify User ID | Music applications, entertainment | `/spotify` |
+| **𝕏 Twitter** | Twitter User ID | Social media credentials, profile data | `/twitter` |
+| **💬 Discord** | Discord User ID | Community credentials, Discord data | `/discord` |
+
+> **📚 Documentation**: See [docs/AUTHENTICATION_SETUP.md](docs/AUTHENTICATION_SETUP.md) for detailed setup guides for all authentication methods and [docs/ROUTE_BASED_AUTH.md](docs/ROUTE_BASED_AUTH.md) for route-based authentication details.
 
 ### 3. Set up Signing keys
 
@@ -145,14 +147,18 @@ Once JWKS URL is set, you should be able to issue credentials locally as well as
 |------------------------------|-----------------------------------------------------------------------------|
 | `NEXT_PUBLIC_PARTNER_ID`     | Your partner ID.                                                           |
 | `NEXT_PUBLIC_ISSUER_DID`     | Your DID.                                                                  |
-| `NEXT_PUBLIC_ISSUE_PROGRAM_ID` | Issuance program ID.                                                      |
-| `NEXT_PUBLIC_HEADLINE`       | Headline text displayed on the page.                                       |
-| `NEXT_PUBLIC_REOWN_PROJECT_ID` | Reown project ID - only required if using `wallet` NEXT_PUBLIC_AUTH_METHOD. |
+| `NEXT_PUBLIC_ISSUE_PROGRAM_ID` | Global default issuance program ID.                                       |
+| `NEXT_PUBLIC_SPOTIFY_PROGRAM_ID` | *(Optional)* Spotify route default program ID.                         |
+| `NEXT_PUBLIC_TWITTER_PROGRAM_ID` | *(Optional)* Twitter route default program ID.                         |
+| `NEXT_PUBLIC_DISCORD_PROGRAM_ID` | *(Optional)* Discord route default program ID.                         |
+| `NEXT_PUBLIC_ETHOS_PROGRAM_ID` | *(Optional)* Ethos/Wallet route default program ID.                     |
+| `NEXT_PUBLIC_HEADLINE`       | *(Optional)* Headline text displayed on the page.                          |
+| `NEXT_PUBLIC_REOWN_PROJECT_ID` | Reown project ID - required for wallet authentication (`/ethos` route).  |
 | `NEXT_PUBLIC_APP_NAME`       | Application name.                                                          |
 | `NEXT_PUBLIC_BUILD_ENV`      | Build environment (`production`, `sandbox`, `staging`).                    |
 | `NEXT_PUBLIC_MOCA_CHAIN`     | MOCA chain (`devnet`, `testnet`).                                          |
-| `NEXT_PUBLIC_AUTH_METHOD`    | Authentication method (`wallet`, `airkit`, `spotify`, `twitter`, or `custom`).      |
 | `NEXT_PUBLIC_THEME`          | The theme of the app (`light`, `dark`, `system`).                          |
+| `NEXT_PUBLIC_SPOTIFY_CLIENT_ID` | *(Optional)* Spotify client ID for OAuth.                               |
 
 #### Server-side Variables
 | Variable             | Description                                                                 |
@@ -221,7 +227,7 @@ npm start
 
 Click the button below to deploy directly to Vercel:
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MocaNetwork/air-credential-issuance-template&env=NEXT_PUBLIC_PARTNER_ID,NEXT_PUBLIC_ISSUER_DID,NEXT_PUBLIC_ISSUE_PROGRAM_ID,NEXT_PUBLIC_HEADLINE,NEXT_PUBLIC_REOWN_PROJECT_ID,NEXT_PUBLIC_APP_NAME,NEXT_PUBLIC_BUILD_ENV,NEXT_PUBLIC_MOCA_CHAIN,NEXT_PUBLIC_AUTH_METHOD,NEXT_PUBLIC_THEME,PARTNER_PRIVATE_KEY,SIGNING_ALGORITHM&envDescription=Configure%20your%20AIR%20Kit%20credentials%20and%20application%20settings&envLink=https://github.com/MocaNetwork/air-credential-issuance-template/blob/main/README.md)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/MocaNetwork/air-credential-issuance-template&env=NEXT_PUBLIC_PARTNER_ID,NEXT_PUBLIC_ISSUER_DID,NEXT_PUBLIC_ISSUE_PROGRAM_ID,NEXT_PUBLIC_HEADLINE,NEXT_PUBLIC_REOWN_PROJECT_ID,NEXT_PUBLIC_APP_NAME,NEXT_PUBLIC_BUILD_ENV,NEXT_PUBLIC_MOCA_CHAIN,NEXT_PUBLIC_THEME,PARTNER_PRIVATE_KEY,SIGNING_ALGORITHM&envDescription=Configure%20your%20AIR%20Kit%20credentials%20and%20application%20settings&envLink=https://github.com/MocaNetwork/air-credential-issuance-template/blob/main/README.md)
 
 
 ### Customizing the UI

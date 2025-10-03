@@ -2,12 +2,14 @@ import { useState } from "react";
 import { env } from "@/lib/env";
 import type { AirService } from "@mocanetwork/airkit";
 import type { CredentialData } from "../types";
+import { useIssuanceProgram } from "@/lib/contexts/IssuanceProgramContext";
 
 interface UseCredentialIssuanceProps {
   airService: AirService;
 }
 
 export const useCredentialIssuance = ({ airService }: UseCredentialIssuanceProps) => {
+  const { programId } = useIssuanceProgram();
   const [isWidgetLoading, setIsWidgetLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
 
@@ -20,6 +22,11 @@ export const useCredentialIssuance = ({ airService }: UseCredentialIssuanceProps
   }) => {
     setIsWidgetLoading(true);
     try {
+      console.log("🎯 [Credential Issuance] ===== PREPARING CREDENTIAL =====");
+      console.log("🎯 [Credential Issuance] Program ID:", programId);
+      console.log("🎯 [Credential Issuance] Issuer DID:", env.NEXT_PUBLIC_ISSUER_DID);
+      console.log("🎯 [Credential Issuance] Raw response data:", JSON.stringify(response, null, 2));
+      
       const credentialSubject = { ...response };
       for (const key in credentialSubject) {
         if (credentialSubject[key] == null) {
@@ -27,18 +34,27 @@ export const useCredentialIssuance = ({ airService }: UseCredentialIssuanceProps
         }
       }
 
-      // Issue credential with AIR Kit
+      console.log("🎯 [Credential Issuance] ===== FINAL CREDENTIAL SUBJECT =====");
+      console.log("🎯 [Credential Issuance] Fields to be sent:", Object.keys(credentialSubject).join(', '));
+      console.log("🎯 [Credential Issuance] credentialSubject:", JSON.stringify(credentialSubject, null, 2));
+      console.log("🎯 [Credential Issuance] Field count:", Object.keys(credentialSubject).length);
+
+      // Issue credential with AIR Kit (uses program ID from env based on route)
+      console.log("🎯 [Credential Issuance] Sending to AIR Kit...");
       const issueResult = await airService.issueCredential({
         authToken: jwt,
         issuerDid: env.NEXT_PUBLIC_ISSUER_DID,
-        credentialId: env.NEXT_PUBLIC_ISSUE_PROGRAM_ID,
+        credentialId: programId,
         credentialSubject,
       });
 
-      console.log("✅ Credential issued successfully:", issueResult);
+      console.log("✅ [Credential Issuance] ===== SUCCESS =====");
+      console.log("✅ [Credential Issuance] Credential issued successfully!");
+      console.log("✅ [Credential Issuance] Result:", issueResult);
       setIsSuccess(true);
     } catch (error) {
-      console.error("❌ Error issuing credential:", error);
+      console.error("❌ [Credential Issuance] ===== ERROR =====");
+      console.error("❌ [Credential Issuance] Failed to issue credential:", error);
       throw error;
     } finally {
       setIsWidgetLoading(false);

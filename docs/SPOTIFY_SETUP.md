@@ -29,7 +29,7 @@ Add to your `.env.local`:
 
 ```bash
 # Authentication Method
-NEXT_PUBLIC_AUTH_METHOD=spotify
+# Navigate to /spotify route - no config needed
 
 # Spotify Credentials
 SPOTIFY_CLIENT_ID=your_spotify_client_id_here

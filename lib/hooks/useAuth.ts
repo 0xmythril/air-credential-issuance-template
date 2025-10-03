@@ -17,7 +17,8 @@ import { AirKitAuthProvider } from '../auth/providers/airkit';
 
 export function useAuth(): UseAuthReturn {
   const [error, setError] = useState<AuthError | null>(null);
-  const currentMethod = env.NEXT_PUBLIC_AUTH_METHOD;
+  // Default to wallet for legacy code (this hook is deprecated - use route-based auth)
+  const currentMethod: "wallet" | "airkit" | "spotify" | "twitter" | "discord" = "wallet";
 
   // Hook dependencies based on auth method
   const spotifySession = useSession();
@@ -153,9 +154,7 @@ export function useAuth(): UseAuthReturn {
 export function useSpotifyCompat() {
   const auth = useAuth();
   
-  if (env.NEXT_PUBLIC_AUTH_METHOD !== 'spotify') {
-    throw new Error('useSpotifyCompat can only be used with Spotify auth method');
-  }
+  // DEPRECATED: This check is removed - use route-based auth instead
   
   const spotifyProvider = auth.provider as SpotifyAuthProvider;
   

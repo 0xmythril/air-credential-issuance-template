@@ -5,9 +5,11 @@ import { env } from "@/lib/env";
 import { useSession } from "@/lib/hooks/useSession";
 import { useAirProvider } from "@/lib/hooks/useAirProvider";
 import { getNameFromAccessToken, formatAirProviderInfo } from "@/lib/utils";
+import { useAuthMethod } from "@/lib/contexts/AuthMethodContext";
 
 export const DebuggingInfo = () => {
   const { accessToken } = useSession();
+  const { authMethod } = useAuthMethod();
   const airProvider = useAirProvider();
   const jwksUrl = `${window.location.origin}/jwks.json`;
 
@@ -22,7 +24,7 @@ export const DebuggingInfo = () => {
           <div className="space-y-1">
             <Label className="text-xs">Authentication Method</Label>
             <div className="px-2 py-1 bg-muted rounded text-xs font-mono">
-              {env.NEXT_PUBLIC_AUTH_METHOD.charAt(0).toUpperCase() + env.NEXT_PUBLIC_AUTH_METHOD.slice(1)}
+              {authMethod.charAt(0).toUpperCase() + authMethod.slice(1)}
             </div>
           </div>
 

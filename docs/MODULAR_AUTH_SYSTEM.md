@@ -137,10 +137,9 @@ transformerRegistry.register(new TwitterDataTransformer());
 Add the new auth method to the environment schema:
 
 ```typescript
-// lib/env/index.ts
-NEXT_PUBLIC_AUTH_METHOD: z.enum([
-  "wallet", "airkit", "spotify", "twitter", "facebook", "github"
-]).default("wallet"),
+// lib/contexts/AuthMethodContext.tsx
+// Auth method is automatically determined from route
+export type AuthMethod = "wallet" | "airkit" | "spotify" | "twitter" | "discord";
 ```
 
 ### Step 5: Configure NextAuth (if OAuth)
@@ -260,8 +259,9 @@ function SpotifySpecific() {
 
 2. **Update Component Logic**:
    ```typescript
-   // Before
-   const isSpotifyLogin = env.NEXT_PUBLIC_AUTH_METHOD === "spotify";
+   // Now (Route-based)
+   const { authMethod } = useAuthMethod();
+   const isSpotifyLogin = authMethod === "spotify";
    if (isSpotifyLogin && !spotify.isAuthenticated) {
      spotify.signIn();
    }
@@ -340,8 +340,8 @@ TWITTER_CLIENT_SECRET=your_twitter_client_secret
 FACEBOOK_CLIENT_ID=your_facebook_client_id
 FACEBOOK_CLIENT_SECRET=your_facebook_client_secret
 
-# Auth method selection
-NEXT_PUBLIC_AUTH_METHOD=spotify
+# Routes automatically determine auth method
+# Navigate to /spotify for Spotify auth
 ```
 
 ### Provider-Specific Configuration

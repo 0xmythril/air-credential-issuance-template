@@ -36,7 +36,7 @@ Add to your `.env.local`:
 
 ```bash
 # Authentication Method
-NEXT_PUBLIC_AUTH_METHOD=twitter
+# Navigate to /twitter route - no config needed
 
 # Twitter Credentials (OAuth 2.0)
 TWITTER_CLIENT_ID=your_twitter_client_id_here

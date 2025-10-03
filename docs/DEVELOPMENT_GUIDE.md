@@ -65,12 +65,13 @@ air-credential-issuance-template/
 
 ### Supported Methods
 
-| Method | Configuration | Use Case |
-|--------|---------------|----------|
-| **Wallet** | `NEXT_PUBLIC_AUTH_METHOD=wallet` | Web3, DeFi, NFT apps |
-| **AIR Kit** | `NEXT_PUBLIC_AUTH_METHOD=airkit` | Direct AIR Kit integration |
-| **Spotify** | `NEXT_PUBLIC_AUTH_METHOD=spotify` | Music, entertainment apps |
-| **Custom** | `NEXT_PUBLIC_AUTH_METHOD=custom` | Other OAuth providers |
+| Method | Route | Use Case |
+|--------|-------|----------|
+| **Wallet** | `/ethos` or `/wallet` | Web3, DeFi, NFT apps |
+| **AIR Kit** | `/airkit` | Direct AIR Kit integration |
+| **Spotify** | `/spotify` | Music, entertainment apps |
+| **Twitter** | `/twitter` | Social media credentials |
+| **Discord** | `/discord` | Community credentials |
 
 ### Adding New Authentication Methods
 

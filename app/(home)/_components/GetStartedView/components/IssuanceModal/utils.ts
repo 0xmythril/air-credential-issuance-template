@@ -1,6 +1,7 @@
 import { env } from "@/lib/env";
 import type { AuthMethod } from "@/lib/contexts/AuthMethodContext";
 import type { SpotifyUserData, SpotifyArtist, SpotifyTrack, MusicTasteSummary, CredentialData } from "./types";
+import { transformerRegistry } from "@/lib/auth/transformers";
 
 /**
  * Helper function to convert array to numbered object with prefixed keys (limit to 3 items)
@@ -25,6 +26,20 @@ export const transformForCredential = (
   data: SpotifyUserData | Record<string, unknown>
 ): CredentialData => {
   const transformed: CredentialData = {};
+
+  console.log('🔄 [transformForCredential] Input user_type:', data.user_type);
+
+  // Handle Twitter data - use transformer registry
+  if (data.user_type === "twitter") {
+    console.log('🔄 [transformForCredential] Detected Twitter data, using TwitterDataTransformer');
+    return transformerRegistry.transform('twitter', data) as CredentialData;
+  }
+
+  // Handle Discord data - use transformer registry
+  if (data.user_type === "discord") {
+    console.log('🔄 [transformForCredential] Detected Discord data, using DiscordDataTransformer');
+    return transformerRegistry.transform('discord', data) as CredentialData;
+  }
 
   // Handle Spotify data
   if (data.user_type === "spotify") {
@@ -84,13 +99,28 @@ export const transformForCredential = (
       }
     }
   } else {
-    // Handle wallet/other data (keep existing logic)
+    // Handle wallet/other data
+    console.log('🔄 [transformForCredential] Processing wallet/ethos data');
+    console.log('🔄 [transformForCredential] Input data:', JSON.stringify(data, null, 2));
+    
+    // Fields to exclude (metadata, not part of schema)
+    const excludedFields = ["is_test_address", "user_type"];
+    
     for (const [key, value] of Object.entries(data)) {
-      if (key === "is_test_address") continue; // Skip test address
+      if (excludedFields.includes(key)) {
+        console.log(`🔄 [transformForCredential] ⏭️ Skipping metadata field: ${key}`);
+        continue;
+      }
       if (value != null) {
         transformed[key] = value as string | number | boolean | object;
+        console.log(`🔄 [transformForCredential] ✅ Included field: ${key} = ${JSON.stringify(value)}`);
+      } else {
+        console.log(`🔄 [transformForCredential] ⚠️ Skipped null/undefined field: ${key}`);
       }
     }
+    
+    console.log('🔄 [transformForCredential] Output:', JSON.stringify(transformed, null, 2));
+    console.log('🔄 [transformForCredential] Final fields:', Object.keys(transformed).join(', '));
   }
 
   return transformed;

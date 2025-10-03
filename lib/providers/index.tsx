@@ -19,6 +19,7 @@ import { useSession } from "../hooks/useSession";
 import { AirkitProvider } from "./AirkitProvider";
 import { ErrorHandler } from "./ErrorHandler";
 import { AuthMethodProvider, useAuthMethod } from "../contexts/AuthMethodContext";
+import { IssuanceProgramProvider } from "../contexts/IssuanceProgramContext";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -144,10 +145,12 @@ export const Providers: React.FC<{
       }
     >
       <AuthMethodProvider>
-        {/* Always wrap with SessionProvider for multi-session support */}
-        <SessionProvider>
-          <ProvidersInner>{children}</ProvidersInner>
-        </SessionProvider>
+        <IssuanceProgramProvider>
+          {/* Always wrap with SessionProvider for multi-session support */}
+          <SessionProvider>
+            <ProvidersInner>{children}</ProvidersInner>
+          </SessionProvider>
+        </IssuanceProgramProvider>
       </AuthMethodProvider>
     </ThemeProvider>
   );

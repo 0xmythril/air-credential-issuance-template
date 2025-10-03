@@ -445,17 +445,25 @@ export async function POST(request: NextRequest) {
       // Determine effective user ID (test mode override) for wallet users
       const effectiveUserId = CONFIG.TEST_ADDRESS || userId;
 
+      console.log('💼 [API user-data] Wallet/Ethos route detected');
+      console.log('💼 [API user-data] Wallet address (userId):', userId);
+      console.log('💼 [API user-data] Effective userId (with test override):', effectiveUserId);
+
       // Fetch data from Ethos API
-      // Current schema used is: { "address": string, "score": integer, "level": string }
+      // Schema: { "address": string, "score": integer, "level": string }
       const ethosData = await fetchEthosData(effectiveUserId);
 
+      console.log('💼 [API user-data] Ethos API response:', ethosData);
+
+      // Return only schema-compliant fields: address, score, level
       responseData = {
-        user_type: "wallet",
-        // address: effectiveUserId,
-        is_test_address: CONFIG.TEST_ADDRESS ? true : false,
+        address: userId, // Use the actual wallet address from the JWT (not test address)
         score: ethosData.score,
         level: ethosData.level,
+        is_test_address: CONFIG.TEST_ADDRESS ? true : false, // Keep for internal use, filtered later
       };
+
+      console.log('💼 [API user-data] Response data:', responseData);
     }
 
     return NextResponse.json(await createUserDataResponse(responseData));

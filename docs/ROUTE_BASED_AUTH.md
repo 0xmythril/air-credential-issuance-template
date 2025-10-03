@@ -108,15 +108,17 @@ function MyComponent() {
 
 ### Environment Variables
 
-The `NEXT_PUBLIC_AUTH_METHOD` environment variable is now **optional** and only used as a fallback for the root `/` route:
+No special environment variables needed for routing! Each route automatically determines its authentication method.
 
 ```bash
-# Optional: Default route when user visits "/"
-# If not set, defaults to "wallet"
-NEXT_PUBLIC_AUTH_METHOD="wallet"
-
 # Optional: Custom headline (if not set, auto-generated based on route)
 NEXT_PUBLIC_HEADLINE=""
+
+# Optional: Per-route issuance programs
+NEXT_PUBLIC_SPOTIFY_PROGRAM_ID=""
+NEXT_PUBLIC_TWITTER_PROGRAM_ID=""
+NEXT_PUBLIC_DISCORD_PROGRAM_ID=""
+NEXT_PUBLIC_ETHOS_PROGRAM_ID=""
 ```
 
 ## Integration Examples
@@ -263,11 +265,10 @@ NEXT_PUBLIC_AUTH_METHOD="spotify"
 ### After:
 ```bash
 # New approach - all methods available via routes
-# This only sets the default for root "/"
-NEXT_PUBLIC_AUTH_METHOD="wallet"
+# No NEXT_PUBLIC_AUTH_METHOD needed!
 ```
 
-Your users can now access:
+Simply remove `NEXT_PUBLIC_AUTH_METHOD` from your `.env` file. Your users can now access:
 - `/spotify` - Spotify authentication
 - `/twitter` - Twitter authentication
 - `/discord` - Discord authentication

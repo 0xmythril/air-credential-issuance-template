@@ -61,12 +61,6 @@ function getAuthMethodFromPath(pathname: string): AuthMethod {
     return 'airkit';
   }
   
-  // Default to wallet or env variable fallback
-  // Use typeof window check to ensure we're on client side
-  if (typeof window !== 'undefined') {
-    const envMethod = process.env.NEXT_PUBLIC_AUTH_METHOD as AuthMethod | undefined;
-    return envMethod || 'wallet';
-  }
-  
+  // Default to wallet for root/home page
   return 'wallet';
 }

@@ -89,7 +89,7 @@ tweet(`Verify your profile: ${twitterCredUrl}`);
 # .env file
 
 # Optional: Sets where "/" redirects to (default: "wallet")
-NEXT_PUBLIC_AUTH_METHOD="wallet"
+# No NEXT_PUBLIC_AUTH_METHOD needed - routes determine auth method!
 
 # Optional: Custom headline (auto-generated if empty)
 NEXT_PUBLIC_HEADLINE=""
@@ -124,7 +124,7 @@ Each authentication method requires OAuth configuration:
 ### Before (Environment-Based)
 ```bash
 # Could only use ONE method per deployment
-NEXT_PUBLIC_AUTH_METHOD="spotify"
+# Routes automatically determine auth - no config needed
 ```
 
 ### After (Route-Based)
