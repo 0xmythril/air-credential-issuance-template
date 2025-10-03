@@ -136,16 +136,16 @@ export const getHeadline = (authMethod: AuthMethod): string => {
 
   switch (authMethod) {
     case "spotify":
-      return "Store your Music Taste Securely on Moca Network";
+      return "Store your Spotify Profile Data Securely on Moca Chain";
     case "twitter":
-      return "Store your Twitter Profile Securely on Moca Network";
+      return "Store your Twitter Profile Data Securely on Moca Chain";
     case "discord":
-      return "Store your Discord Profile Securely on Moca Network";
+      return "Store your Discord Profile Data Securely on Moca Chain";
     case "wallet":
-      return "Store your Reputation Securely on Moca Network";
+      return "Store your Wallet ProfileData Securely on Moca Chain";
     case "airkit":
-      return "Store your Data Securely on Moca Network";
+      return "Store your Data Securely on Moca Chain";
     default:
-      return "Store your Data Securely on Moca Network";
+      return "Store your Data Securely on Moca Chain";
   }
 };

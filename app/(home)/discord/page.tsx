@@ -2,6 +2,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useDiscord } from "@/lib/hooks/useDiscord";
 import { GetStartedView } from "../_components/GetStartedView";
+import { RouteHero } from "@/components/common/RouteHero";
 
 export default function DiscordPage() {
   const discord = useDiscord();
@@ -17,5 +18,12 @@ export default function DiscordPage() {
     );
   }
 
-  return <GetStartedView />;
+  return (
+    <>
+      <div className="pt-4" />
+      <RouteHero />
+      <div className="pt-4" />
+      <GetStartedView />
+    </>
+  );
 }

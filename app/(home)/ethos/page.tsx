@@ -2,6 +2,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useAccount } from "wagmi";
 import { GetStartedView } from "../_components/GetStartedView";
+import { RouteHero } from "@/components/common/RouteHero";
 
 export default function EthosPage() {
   const { isReconnecting } = useAccount();
@@ -17,5 +18,12 @@ export default function EthosPage() {
     );
   }
 
-  return <GetStartedView />;
+  return (
+    <>
+      <div className="pt-4" />
+      <RouteHero />
+      <div className="pt-4" />
+      <GetStartedView />
+    </>
+  );
 }

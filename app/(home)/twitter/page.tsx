@@ -2,6 +2,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useTwitter } from "@/lib/hooks/useTwitter";
 import { GetStartedView } from "../_components/GetStartedView";
+import { RouteHero } from "@/components/common/RouteHero";
 
 export default function TwitterPage() {
   const twitter = useTwitter();
@@ -17,5 +18,12 @@ export default function TwitterPage() {
     );
   }
 
-  return <GetStartedView />;
+  return (
+    <>
+      <div className="pt-4" />
+      <RouteHero />
+      <div className="pt-4" />
+      <GetStartedView />
+    </>
+  );
 }

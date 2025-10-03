@@ -2,6 +2,7 @@
 import { Spinner } from "@/components/ui/spinner";
 import { useSpotify } from "@/lib/hooks/useSpotify";
 import { GetStartedView } from "../_components/GetStartedView";
+import { RouteHero } from "@/components/common/RouteHero";
 
 export default function SpotifyPage() {
   const spotify = useSpotify();
@@ -17,5 +18,12 @@ export default function SpotifyPage() {
     );
   }
 
-  return <GetStartedView />;
+  return (
+    <>
+      <div className="pt-4" />
+      <RouteHero />
+      <div className="pt-4" />
+      <GetStartedView />
+    </>
+  );
 }
