@@ -42,25 +42,45 @@ export const TwitterPreview = ({ credentialData }: TwitterPreviewProps) => {
           <div className="space-y-1">
             <div className="text-xs font-medium text-muted-foreground">Metrics:</div>
             <div className="pl-2 space-y-1 text-xs">
-              {credentialData.followers_count !== undefined && (
+              {credentialData.followers !== undefined ? (
+                <div>
+                  <span className="font-medium">Followers:</span>{" "}
+                  {Number(credentialData.followers).toLocaleString()}
+                </div>
+              ) : credentialData.followers_count !== undefined && (
                 <div>
                   <span className="font-medium">Followers:</span>{" "}
                   {Number(credentialData.followers_count).toLocaleString()}
                 </div>
               )}
-              {credentialData.following_count !== undefined && (
+              {credentialData.following !== undefined ? (
+                <div>
+                  <span className="font-medium">Following:</span>{" "}
+                  {Number(credentialData.following).toLocaleString()}
+                </div>
+              ) : credentialData.following_count !== undefined && (
                 <div>
                   <span className="font-medium">Following:</span>{" "}
                   {Number(credentialData.following_count).toLocaleString()}
                 </div>
               )}
-              {credentialData.tweet_count !== undefined && (
+              {credentialData.tweets !== undefined ? (
+                <div>
+                  <span className="font-medium">Tweets:</span>{" "}
+                  {Number(credentialData.tweets).toLocaleString()}
+                </div>
+              ) : credentialData.tweet_count !== undefined && (
                 <div>
                   <span className="font-medium">Tweets:</span>{" "}
                   {Number(credentialData.tweet_count).toLocaleString()}
                 </div>
               )}
-              {credentialData.listed_count !== undefined && (
+              {credentialData.listed !== undefined ? (
+                <div>
+                  <span className="font-medium">Listed:</span>{" "}
+                  {Number(credentialData.listed).toLocaleString()}
+                </div>
+              ) : credentialData.listed_count !== undefined && (
                 <div>
                   <span className="font-medium">Listed:</span>{" "}
                   {Number(credentialData.listed_count).toLocaleString()}
