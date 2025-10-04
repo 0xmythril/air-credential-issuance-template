@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
 import { Music, Twitter, MessageSquare, Wallet } from "lucide-react";
+import Link from "next/link";
 
 interface CredentialOption {
   id: string;

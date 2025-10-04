@@ -22,6 +22,13 @@ export const useCredentialIssuance = ({ airService }: UseCredentialIssuanceProps
   }) => {
     setIsWidgetLoading(true);
     try {
+      // QA mock mode: short-circuit issuance to test success screen
+      if (env.NEXT_PUBLIC_MOCK_ISSUANCE) {
+        console.warn("[QA] Mock issuance enabled - skipping AIR Kit SDK call");
+        await new Promise((r) => setTimeout(r, 300));
+        setIsSuccess(true);
+        return;
+      }
       console.log("🎯 [Credential Issuance] ===== PREPARING CREDENTIAL =====");
       console.log("🎯 [Credential Issuance] Program ID:", programId);
       console.log("🎯 [Credential Issuance] Issuer DID:", env.NEXT_PUBLIC_ISSUER_DID);

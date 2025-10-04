@@ -11,7 +11,7 @@ import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
 import { toast } from "sonner";
-import { LoadingState, ErrorState } from "@/components/common/States";
+import { ErrorState } from "@/components/common/States";
 import { useState } from "react";
 import { ErrorShelf } from "@/components/common/ErrorShelf";
 import { normalizeError, createCorrelationId, type NormalizedError } from "@/lib/utils/error-utils";
@@ -49,6 +49,8 @@ export function IssuanceModal() {
 
   const { issueCredential, isWidgetLoading, setIsWidgetLoading, isSuccess } =
     useCredentialIssuance({ airService });
+
+  // Preflight checklist removed to avoid blocking the CTA; authentication is handled within onContinue.
 
   const onContinue = async () => {
     console.log("🚀 [onContinue] Starting credential issuance flow");
@@ -214,6 +216,14 @@ export function IssuanceModal() {
     return (
       <div className="w-full max-w-[420px] text-sm text-center">
         🎉 Congrats! You have successfully stored your data securely.
+        <div className="mt-4 grid gap-2">
+          <Button asChild size="sm" variant="default">
+            <a href="/explore">Explore more credentials</a>
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <a href="/">Issue another</a>
+          </Button>
+        </div>
       </div>
     );
   }
@@ -290,6 +300,8 @@ export function IssuanceModal() {
           )}
         </>
       )}
+
+      {/* Preflight checklist intentionally removed */}
 
       {/* Action button */}
       {isError ? (

@@ -44,6 +44,7 @@ export const env = createEnv({
     NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE: z.string().optional(),
     NEXT_PUBLIC_ANNOUNCEMENT_ID: z.string().optional(),
     NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS: z.coerce.number().optional(),
+    NEXT_PUBLIC_MOCK_ISSUANCE: z.coerce.number().optional(),
   },
   runtimeEnv: {
     PARTNER_PRIVATE_KEY: process.env.PARTNER_PRIVATE_KEY,
@@ -77,6 +78,7 @@ export const env = createEnv({
     NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE: process.env.NEXT_PUBLIC_ANNOUNCEMENT_MESSAGE,
     NEXT_PUBLIC_ANNOUNCEMENT_ID: process.env.NEXT_PUBLIC_ANNOUNCEMENT_ID,
     NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS: process.env.NEXT_PUBLIC_ANNOUNCEMENT_TTL_DAYS,
+    NEXT_PUBLIC_MOCK_ISSUANCE: process.env.NEXT_PUBLIC_MOCK_ISSUANCE,
   },
 });
 
