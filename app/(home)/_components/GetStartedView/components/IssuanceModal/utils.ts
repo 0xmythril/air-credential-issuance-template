@@ -41,6 +41,12 @@ export const transformForCredential = (
     return transformerRegistry.transform('discord', data as Record<string, unknown>) as CredentialData;
   }
 
+  // Handle LinkedIn data - use transformer registry
+  if (data.user_type === "linkedin") {
+    console.log('🔄 [transformForCredential] Detected LinkedIn data, using LinkedInDataTransformer');
+    return transformerRegistry.transform('linkedin', data as Record<string, unknown>) as CredentialData;
+  }
+
   // Handle Spotify data
   if (data.user_type === "spotify") {
     // Basic user info (exclude user_type and display_name as requested)
@@ -142,7 +148,9 @@ export const getHeadline = (authMethod: AuthMethod): string => {
     case "discord":
       return "Store your Discord Profile Data Securely on Moca Chain";
     case "wallet":
-      return "Store your Wallet ProfileData Securely on Moca Chain";
+      return "Store your Wallet Profile Data Securely on Moca Chain";
+      case "linkedin":
+        return "Store your Linkedin Profile Data Securely on Moca Chain";
     case "airkit":
       return "Store your Data Securely on Moca Chain";
     default:

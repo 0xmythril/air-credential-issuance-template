@@ -476,15 +476,128 @@ class DiscordDataTransformer implements DataTransformer {
   }
 }
 
+// LinkedIn data transformer - matches linkedin.json schema
+class LinkedInDataTransformer implements DataTransformer {
+  readonly name = 'linkedin';
+
+  transform(data: Record<string, unknown>): Record<string, unknown> {
+    console.log('💼 [LinkedIn Transformer] ===== START TRANSFORMATION =====');
+    console.log('💼 [LinkedIn Transformer] Input data:', JSON.stringify(data, null, 2));
+    console.log('💼 [LinkedIn Transformer] Schema fields: linkedin_id, name, email, given_name, family_name, picture, locale, profile_url, headline, location, connections, position, company');
+    
+    // Schema fields: linkedin_id, name, email, given_name, family_name, picture, locale,
+    // profile_url, headline, location, connections (int), position, company
+    const transformed: Record<string, string | number> = {};
+
+    // linkedin_id (string) - required
+    if (data.linkedin_id && typeof data.linkedin_id === 'string') {
+      transformed.linkedin_id = data.linkedin_id;
+      console.log('💼 [LinkedIn Transformer] ✅ linkedin_id:', transformed.linkedin_id);
+    } else {
+      console.log('💼 [LinkedIn Transformer] ⚠️ linkedin_id: missing or invalid');
+    }
+
+    // name (string)
+    if (data.name && typeof data.name === 'string') {
+      transformed.name = data.name;
+      console.log('💼 [LinkedIn Transformer] ✅ name:', transformed.name);
+    } else {
+      console.log('💼 [LinkedIn Transformer] ⚠️ name: missing or invalid');
+    }
+    
+    // email (string)
+    if (data.email && typeof data.email === 'string') {
+      transformed.email = data.email;
+      console.log('💼 [LinkedIn Transformer] ✅ email:', transformed.email);
+    } else {
+      console.log('💼 [LinkedIn Transformer] ⚠️ email: missing or invalid');
+    }
+    
+    // given_name (string)
+    if (data.given_name && typeof data.given_name === 'string') {
+      transformed.given_name = data.given_name;
+      console.log('💼 [LinkedIn Transformer] ✅ given_name:', transformed.given_name);
+    }
+    
+    // family_name (string)
+    if (data.family_name && typeof data.family_name === 'string') {
+      transformed.family_name = data.family_name;
+      console.log('💼 [LinkedIn Transformer] ✅ family_name:', transformed.family_name);
+    }
+    
+    // picture (string) - profile picture URL
+    if (data.picture && typeof data.picture === 'string') {
+      transformed.picture = data.picture;
+      console.log('💼 [LinkedIn Transformer] ✅ picture:', transformed.picture);
+    }
+    
+    // locale (string)
+    if (data.locale && typeof data.locale === 'string') {
+      transformed.locale = data.locale;
+      console.log('💼 [LinkedIn Transformer] ✅ locale:', transformed.locale);
+    }
+    
+    // profile_url (string)
+    if (data.profile_url && typeof data.profile_url === 'string') {
+      transformed.profile_url = data.profile_url;
+      console.log('💼 [LinkedIn Transformer] ✅ profile_url:', transformed.profile_url);
+    }
+    
+    // headline (string) - requires Marketing Developer Platform
+    if (data.headline && typeof data.headline === 'string') {
+      transformed.headline = data.headline;
+      console.log('💼 [LinkedIn Transformer] ✅ headline:', transformed.headline);
+    }
+    
+    // location (string) - requires Marketing Developer Platform
+    if (data.location && typeof data.location === 'string') {
+      transformed.location = data.location;
+      console.log('💼 [LinkedIn Transformer] ✅ location:', transformed.location);
+    }
+    
+    // connections (integer) - requires Marketing Developer Platform
+    if (data.connections !== undefined) {
+      const connections = typeof data.connections === 'number' ? data.connections : parseInt(String(data.connections), 10);
+      if (!isNaN(connections)) {
+        transformed.connections = Math.round(connections);
+        console.log('💼 [LinkedIn Transformer] ✅ connections:', transformed.connections);
+      }
+    }
+    
+    // position (string) - requires Marketing Developer Platform
+    if (data.position && typeof data.position === 'string') {
+      transformed.position = data.position;
+      console.log('💼 [LinkedIn Transformer] ✅ position:', transformed.position);
+    }
+    
+    // company (string) - requires Marketing Developer Platform
+    if (data.company && typeof data.company === 'string') {
+      transformed.company = data.company;
+      console.log('💼 [LinkedIn Transformer] ✅ company:', transformed.company);
+    }
+
+    console.log('💼 [LinkedIn Transformer] ===== TRANSFORMATION COMPLETE =====');
+    console.log('💼 [LinkedIn Transformer] Output data:', JSON.stringify(transformed, null, 2));
+    console.log('💼 [LinkedIn Transformer] Fields included:', Object.keys(transformed).join(', '));
+    
+    return transformed;
+  }
+
+  validate(data: Record<string, unknown>): boolean {
+    return typeof data === 'object' && data !== null && 'linkedin_id' in data;
+  }
+}
+
 // Register all transformers
 transformerRegistry.register(new SpotifyDataTransformer());
 transformerRegistry.register(new WalletDataTransformer());
 transformerRegistry.register(new AirKitDataTransformer());
 transformerRegistry.register(new TwitterDataTransformer());
 transformerRegistry.register(new DiscordDataTransformer());
+transformerRegistry.register(new LinkedInDataTransformer());
 
 // Export transformers
-export { SpotifyDataTransformer, WalletDataTransformer, AirKitDataTransformer, TwitterDataTransformer, DiscordDataTransformer };
+export { SpotifyDataTransformer, WalletDataTransformer, AirKitDataTransformer, TwitterDataTransformer, DiscordDataTransformer, LinkedInDataTransformer };
 
 // Helper function to transform data for any provider
 export function transformForCredential(

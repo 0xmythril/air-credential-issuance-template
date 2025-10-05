@@ -38,6 +38,11 @@ function getProgramIdForAuthMethod(authMethod: AuthMethod): string {
       programId = env.NEXT_PUBLIC_DISCORD_PROGRAM_ID;
       console.log(`  📋 ${envVarName}:`, programId);
       break;
+    case "linkedin":
+      envVarName = "NEXT_PUBLIC_LINKEDIN_PROGRAM_ID";
+      programId = env.NEXT_PUBLIC_LINKEDIN_PROGRAM_ID;
+      console.log(`  📋 ${envVarName}:`, programId);
+      break;
     case "wallet":
       // Check both WALLET and ETHOS variants
       envVarName = "NEXT_PUBLIC_WALLET_PROGRAM_ID or NEXT_PUBLIC_ETHOS_PROGRAM_ID";
@@ -82,6 +87,8 @@ export function IssuanceProgramProvider({ children }: { children: React.ReactNod
       authMethod = "twitter";
     } else if (firstSegment === "discord") {
       authMethod = "discord";
+    } else if (firstSegment === "linkedin") {
+      authMethod = "linkedin";
     } else if (firstSegment === "ethos" || firstSegment === "wallet") {
       authMethod = "wallet";
     } else if (firstSegment === "airkit") {

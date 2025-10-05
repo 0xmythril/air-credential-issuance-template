@@ -1,17 +1,16 @@
 "use client";
-import { Spinner } from "@/components/ui/spinner";
 import { LoadingState } from "@/components/common/States";
-import { useDiscord } from "@/lib/hooks/useDiscord";
+import { useLinkedIn } from "@/lib/hooks/useLinkedIn";
 import { GetStartedView } from "../_components/GetStartedView";
 import { RouteHero } from "@/components/common/RouteHero";
 
-export default function DiscordPage() {
-  const discord = useDiscord();
+export default function LinkedInPage() {
+  const linkedin = useLinkedIn();
 
-  if (discord.isLoading) {
+  if (linkedin.isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center p-4">
-        <LoadingState title="Loading Discord session..." />
+        <LoadingState title="Loading LinkedIn session..." />
       </div>
     );
   }
@@ -25,3 +24,4 @@ export default function DiscordPage() {
     </>
   );
 }
+

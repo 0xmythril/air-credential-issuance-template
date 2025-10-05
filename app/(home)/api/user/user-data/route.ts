@@ -67,6 +67,23 @@ interface DiscordDataResponse {
   [key: string]: unknown;
 }
 
+interface LinkedInDataResponse {
+  linkedin_id: string;
+  name: string;
+  email: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  locale?: string;
+  profile_url?: string;
+  headline?: string;
+  location?: string;
+  connections?: number;
+  position?: string;
+  company?: string;
+  [key: string]: unknown;
+}
+
 // =============================================
 // CONFIGURATION
 // =============================================
@@ -127,6 +144,7 @@ interface SessionToken {
   spotifyAccessToken?: string;
   twitterAccessToken?: string;
   discordAccessToken?: string;
+  linkedinAccessToken?: string;
 }
 
 // Spotify API response interfaces
@@ -379,6 +397,89 @@ const fetchDiscordData = async (sessionToken: SessionToken, discordAccessToken?:
   return responseData;
 };
 
+/**
+ * Fetches LinkedIn data using the LinkedIn access token from session
+ */
+const fetchLinkedInData = async (sessionToken: SessionToken, linkedinAccessToken?: string): Promise<LinkedInDataResponse> => {
+  const linkedinId = sessionToken.sub || 'unknown';
+  const name = sessionToken.name || linkedinId;
+  const email = sessionToken.email || '';
+
+  // Default response structure
+  const responseData: LinkedInDataResponse = {
+    linkedin_id: linkedinId,
+    name: name,
+    email: email,
+  };
+
+  // If we have a LinkedIn access token, fetch real data
+  if (linkedinAccessToken) {
+    try {
+      console.log("💼 [LinkedIn API] Fetching profile data with access token");
+      
+      // Fetch comprehensive profile data using LinkedIn API v2 with userinfo endpoint
+      // This endpoint provides OpenID Connect standard claims plus LinkedIn-specific data
+      const profileResponse = await fetch('https://api.linkedin.com/v2/userinfo', {
+        headers: {
+          'Authorization': `Bearer ${linkedinAccessToken}`,
+        },
+      });
+
+      if (profileResponse.ok) {
+        const profileData = await profileResponse.json();
+        console.log("💼 [LinkedIn API] Profile data received:", profileData);
+        
+        // Standard OpenID Connect fields
+        responseData.linkedin_id = profileData.sub || linkedinId;
+        responseData.name = profileData.name || name;
+        responseData.email = profileData.email || email;
+        
+        // LinkedIn-specific fields from userinfo endpoint
+        if (profileData.given_name) responseData.given_name = profileData.given_name;
+        if (profileData.family_name) responseData.family_name = profileData.family_name;
+        if (profileData.picture) responseData.picture = profileData.picture;
+        if (profileData.locale) responseData.locale = profileData.locale;
+      }
+
+      // Fetch additional profile data from /v2/me endpoint (requires r_liteprofile or r_basicprofile)
+      const meResponse = await fetch('https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams),vanityName)', {
+        headers: {
+          'Authorization': `Bearer ${linkedinAccessToken}`,
+          'X-Restli-Protocol-Version': '2.0.0',
+        },
+      });
+
+      if (meResponse.ok) {
+        const meData = await meResponse.json();
+        console.log("💼 [LinkedIn API] /v2/me data received:", meData);
+        
+        // Profile URL (vanityName is the custom LinkedIn URL)
+        if (meData.vanityName) {
+          responseData.profile_url = `https://www.linkedin.com/in/${meData.vanityName}`;
+        }
+        
+        // Localized names (if not already set)
+        if (!responseData.name && meData.localizedFirstName && meData.localizedLastName) {
+          responseData.name = `${meData.localizedFirstName} ${meData.localizedLastName}`.trim();
+        }
+      }
+
+      // Note: To get position, company, headline, and connections, you need:
+      // 1. Marketing Developer Platform access (requires LinkedIn partnership)
+      // 2. Additional scopes: r_basicprofile, r_organization_social
+      // 3. Different API endpoints that require application review
+      
+      // For now, we're using the freely available OpenID Connect data
+      console.log("💼 [LinkedIn API] Final response data:", responseData);
+
+    } catch (error) {
+      console.error("💼 [LinkedIn API] Error fetching LinkedIn data:", error);
+    }
+  }
+
+  return responseData;
+};
+
 // =============================================
 // MAIN API HANDLER
 // =============================================
@@ -440,6 +541,17 @@ export async function POST(request: NextRequest) {
       responseData = {
         user_type: "discord",
         ...discordData,
+      };
+    } else if (type === "linkedin") {
+      // Extract LinkedIn access token from session
+      const tokenData = sessionAccessTokenResult as SessionToken;
+      const linkedinAccessToken = tokenData.linkedinAccessToken;
+      
+      // Fetch LinkedIn-specific data
+      const linkedinData = await fetchLinkedInData(tokenData, linkedinAccessToken);
+      responseData = {
+        user_type: "linkedin",
+        ...linkedinData,
       };
     } else {
       // Determine effective user ID (test mode override) for wallet users

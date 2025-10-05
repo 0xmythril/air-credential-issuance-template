@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 
-export type AuthMethod = "wallet" | "airkit" | "spotify" | "twitter" | "discord";
+export type AuthMethod = "wallet" | "airkit" | "spotify" | "twitter" | "discord" | "linkedin";
 
 interface AuthMethodContextType {
   authMethod: AuthMethod;
@@ -53,6 +53,9 @@ function getAuthMethodFromPath(pathname: string): AuthMethod {
   }
   if (firstSegment === 'discord') {
     return 'discord';
+  }
+  if (firstSegment === 'linkedin') {
+    return 'linkedin';
   }
   if (firstSegment === 'ethos' || firstSegment === 'wallet') {
     return 'wallet';

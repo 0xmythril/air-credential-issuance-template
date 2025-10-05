@@ -9,7 +9,11 @@ export default function EthosPage() {
   const { isReconnecting } = useAccount();
 
   if (isReconnecting) {
-    return <LoadingState title="Retrieving your data..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <LoadingState title="Retrieving your data..." />
+      </div>
+    );
   }
 
   return (

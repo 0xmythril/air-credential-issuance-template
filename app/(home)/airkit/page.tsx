@@ -9,7 +9,11 @@ export default function AirKitPage() {
   const { isInitialized } = useAirkit();
 
   if (!isInitialized) {
-    return <LoadingState title="Initializing AIR Kit..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <LoadingState title="Initializing AIR Kit..." />
+      </div>
+    );
   }
 
   return (

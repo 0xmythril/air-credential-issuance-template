@@ -2,6 +2,7 @@ import { NextAuthOptions } from "next-auth";
 import SpotifyProvider from "next-auth/providers/spotify";
 import TwitterProvider from "next-auth/providers/twitter";
 import DiscordProvider from "next-auth/providers/discord";
+import LinkedInProvider from "next-auth/providers/linkedin";
 import { env } from "./env";
 
 const spotifyScopes = [
@@ -27,6 +28,13 @@ const discordScopes = [
   "email",
   "guilds",
   "connections"
+].join(" ");
+
+// LinkedIn scopes
+const linkedinScopes = [
+  "openid",
+  "profile",
+  "email"
 ].join(" ");
 
 export const authOptions: NextAuthOptions = {
@@ -57,6 +65,26 @@ export const authOptions: NextAuthOptions = {
         params: {
           scope: discordScopes,
         },
+      },
+    }),
+    LinkedInProvider({
+      clientId: env.LINKEDIN_CLIENT_ID || "",
+      clientSecret: env.LINKEDIN_CLIENT_SECRET || "",
+      authorization: {
+        params: {
+          scope: linkedinScopes,
+        },
+      },
+      wellKnown: "https://www.linkedin.com/oauth/.well-known/openid-configuration",
+      token: "https://www.linkedin.com/oauth/v2/accessToken",
+      userinfo: "https://api.linkedin.com/v2/userinfo",
+      profile(profile) {
+        return {
+          id: profile.sub,
+          name: profile.name,
+          email: profile.email,
+          image: profile.picture,
+        };
       },
     }),
   ],
@@ -100,6 +128,19 @@ export const authOptions: NextAuthOptions = {
           token.discordUsername = discordProfile.username as string;
           token.discordDiscriminator = discordProfile.discriminator as string;
         }
+        
+        // Store LinkedIn-specific user data
+        if (account.provider === 'linkedin' && profile) {
+          console.log("💼 [NextAuth JWT] LinkedIn profile received:", profile);
+          console.log("💼 [NextAuth JWT] LinkedIn profile keys:", Object.keys(profile));
+          
+          const linkedinProfile = profile as Record<string, unknown>;
+          token.linkedinId = linkedinProfile.sub as string || linkedinProfile.id as string;
+          token.linkedinEmail = linkedinProfile.email as string;
+          
+          console.log("💼 [NextAuth JWT] Stored linkedinId:", token.linkedinId);
+          console.log("💼 [NextAuth JWT] Stored linkedinEmail:", token.linkedinEmail);
+        }
       }
       return token;
     },
@@ -129,6 +170,20 @@ export const authOptions: NextAuthOptions = {
           (session.user as Record<string, unknown>).id = token.discordId as string;
           (session.user as Record<string, unknown>).username = token.discordUsername as string;
           (session.user as Record<string, unknown>).discriminator = token.discordDiscriminator as string;
+        }
+      }
+      
+      if (token.provider === 'linkedin') {
+        console.log("💼 [NextAuth Session] Processing LinkedIn session");
+        console.log("💼 [NextAuth Session] linkedinId from token:", token.linkedinId);
+        console.log("💼 [NextAuth Session] linkedinEmail from token:", token.linkedinEmail);
+        
+        if (session.user) {
+          (session.user as Record<string, unknown>).id = token.linkedinId as string;
+          (session.user as Record<string, unknown>).linkedinId = token.linkedinId as string;
+          (session.user as Record<string, unknown>).email = token.linkedinEmail as string;
+          
+          console.log("💼 [NextAuth Session] Updated session.user:", session.user);
         }
       }
       

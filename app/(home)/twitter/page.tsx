@@ -9,7 +9,11 @@ export default function TwitterPage() {
   const twitter = useTwitter();
 
   if (twitter.isLoading) {
-    return <LoadingState title="Loading Twitter session..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <LoadingState title="Loading Twitter session..." />
+      </div>
+    );
   }
 
   return (

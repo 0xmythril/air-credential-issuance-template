@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRouter } from "next/navigation";
-import { Music, Twitter, MessageSquare, Wallet } from "lucide-react";
+import { Music, Twitter, MessageSquare, Wallet, Briefcase } from "lucide-react";
 import Link from "next/link";
 
 interface CredentialOption {
@@ -59,6 +59,20 @@ const credentialOptions: CredentialOption[] = [
       "Music Diversity Score"
     ]
   },
+  // {
+  //   id: "linkedin",
+  //   title: "Professional Profile Credential",
+  //   description: "Temporarily hidden: current LinkedIn API access provides limited useful data.",
+  //   icon: <Briefcase className="h-8 w-8" />,
+  //   route: "/linkedin",
+  //   color: "text-blue-700 dark:text-blue-500",
+  //   features: [
+  //     "Professional Headline",
+  //     "Company & Position",
+  //     "Location",
+  //     "Connections Count"
+  //   ]
+  // },
   {
     id: "wallet",
     title: "Web3 Wallet Credential",

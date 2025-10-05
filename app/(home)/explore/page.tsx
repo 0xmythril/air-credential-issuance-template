@@ -40,6 +40,7 @@ const DATA_SOURCE_COLORS: Record<string, string> = {
   Twitter: "bg-blue-500/10 text-blue-500 border border-blue-500/20",
   Spotify: "bg-green-500/10 text-green-500 border border-green-500/20",
   Discord: "bg-purple-500/10 text-purple-500 border border-purple-500/20",
+  LinkedIn: "bg-blue-700/10 text-blue-700 border border-blue-700/20",
   Wallet: "bg-orange-500/10 text-orange-500 border border-orange-500/20",
 };
 
@@ -83,6 +84,16 @@ const CREDENTIAL_SCHEMAS: CredentialSchema[] = [
     fields: ["discord_id", "username", "discriminator", "guilds_count", "owned_guilds_count", "connections_count", "global_name", "verified", "locale", "premium_type", "public_flags"],
     color: DATA_SOURCE_COLORS.Discord,
     apis: ["Discord OAuth2", "Discord API"],
+  },
+  {
+    // id: "linkedin",
+    // name: "LinkedIn Credential",
+    // dataSource: "LinkedIn",
+    // description: "Temporarily hidden: current LinkedIn API access provides limited useful data.",
+    // route: "/linkedin",
+    // fields: ["linkedin_id", "name", "email", "given_name", "family_name", "picture", "locale", "profile_url", "headline", "location", "connections", "position", "company"],
+    // color: DATA_SOURCE_COLORS.LinkedIn,
+    // apis: ["LinkedIn OAuth 2.0", "LinkedIn OpenID Connect", "LinkedIn API v2"],
   },
 ];
 

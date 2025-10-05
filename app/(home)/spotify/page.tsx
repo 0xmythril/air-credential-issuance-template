@@ -9,7 +9,11 @@ export default function SpotifyPage() {
   const spotify = useSpotify();
 
   if (spotify.isLoading) {
-    return <LoadingState title="Loading Spotify session..." />;
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <LoadingState title="Loading Spotify session..." />
+      </div>
+    );
   }
 
   return (

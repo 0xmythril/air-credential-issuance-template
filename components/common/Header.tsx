@@ -8,7 +8,7 @@ import { useAirProvider } from "../../lib/hooks/useAirProvider";
 import { useSpotify } from "../../lib/hooks/useSpotify";
 import { useTwitter } from "../../lib/hooks/useTwitter";
 import { useDiscord } from "../../lib/hooks/useDiscord";
-import { Search, Menu, Home } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import { SessionsSidebar } from "./SessionsSidebar";
@@ -47,16 +47,7 @@ export const Header = () => {
   const twitter = useSafeTwitter();
   const discord = useSafeDiscord();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
-  const isHomePage = pathname === "/";
 
-  // Check if any accounts are connected
-  const hasConnections = 
-    (discord.isAuthenticated && !!sessionStore.sessions.discord.accessToken) ||
-    (twitter.isAuthenticated && !!sessionStore.sessions.twitter.accessToken) ||
-    (spotify.isAuthenticated && !!sessionStore.sessions.spotify.accessToken) ||
-    !!sessionStore.sessions.wallet.accessToken ||
-    airProvider.isLoggedIn;
 
   return (
     <>
@@ -109,17 +100,15 @@ export const Header = () => {
           {/* Right side - Theme + Account Dashboard Button */}
           <div className="flex items-center gap-2 mr-4">
             <ThemeToggle />
-            {hasConnections && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Menu className="h-4 w-4" />
-                <span className="hidden sm:inline">Accounts</span>
-              </Button>
-            )}
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Menu className="h-4 w-4" />
+              <span className="hidden sm:inline">Accounts</span>
+            </Button>
           </div>
         </div>
       </header>

@@ -2,9 +2,11 @@ interface InfoMessagesProps {
   isSpotifyLogin: boolean;
   isTwitterLogin: boolean;
   isDiscordLogin: boolean;
+  isLinkedInLogin: boolean;
   spotifyAuthenticated: boolean;
   twitterAuthenticated: boolean;
   discordAuthenticated: boolean;
+  linkedinAuthenticated: boolean;
   hasAccessToken: boolean;
 }
 
@@ -12,9 +14,11 @@ export const InfoMessages = ({
   isSpotifyLogin,
   isTwitterLogin,
   isDiscordLogin,
+  isLinkedInLogin,
   spotifyAuthenticated,
   twitterAuthenticated,
   discordAuthenticated,
+  linkedinAuthenticated,
   hasAccessToken,
 }: InfoMessagesProps) => {
   if (isSpotifyLogin) {
@@ -77,6 +81,28 @@ export const InfoMessages = ({
           <div className="bg-indigo-50 dark:bg-indigo-950 rounded-lg p-3">
             ℹ️ You&apos;re signed in to Discord. Click &ldquo;Get My Discord Profile&rdquo; to fetch your
             server activity and create a credential.
+          </div>
+        </div>
+      );
+    }
+  }
+
+  if (isLinkedInLogin) {
+    if (!linkedinAuthenticated) {
+      return (
+        <div className="text-sm text-muted-foreground max-w-md space-y-2">
+          <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3">
+            💼 Connect your LinkedIn account to create a credential based on your professional profile
+          </div>
+        </div>
+      );
+    }
+    if (!hasAccessToken) {
+      return (
+        <div className="text-sm text-muted-foreground max-w-md space-y-2">
+          <div className="bg-blue-50 dark:bg-blue-950 rounded-lg p-3">
+            ℹ️ You&apos;re signed in to LinkedIn. Click &ldquo;Get My Profile Data&rdquo; to fetch your
+            professional information and create a credential.
           </div>
         </div>
       );

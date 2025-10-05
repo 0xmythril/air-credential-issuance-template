@@ -1,5 +1,6 @@
 import { env } from "@/lib/env";
 import { withPrivateKeyHeaders } from "@/lib/utils/jwt";
+import { createPublicKey, createPrivateKey } from "crypto";
 import * as jose from "jose";
 import { NextResponse } from "next/server";
 
@@ -7,13 +8,19 @@ export const revalidate = 86400; // 24 hours
 
 export async function GET() {
   try {
-    const privateKey = await jose.importPKCS8(
-      withPrivateKeyHeaders(env.PARTNER_PRIVATE_KEY),
-      env.SIGNING_ALGORITHM,
-      { extractable: true }
-    );
+    const privateKeyPem = withPrivateKeyHeaders(env.PARTNER_PRIVATE_KEY);
 
-    const jwk = await jose.exportJWK(privateKey);
+    // Import private key using Node crypto so we can derive the public key
+    const privateKey = createPrivateKey({
+      key: privateKeyPem,
+      format: "pem",
+      type: "pkcs8",
+    });
+
+    const publicKey = createPublicKey(privateKey);
+
+    // Export the public JWK (no private components)
+    const jwk = await jose.exportJWK(publicKey);
 
     const jwks = {
       keys: [

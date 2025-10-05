@@ -6,7 +6,7 @@ import { getNameFromAccessToken } from "@/lib/utils";
 import { useAccount } from "wagmi";
 import { useUserData } from "../../hooks";
 import { transformForCredential, getHeadline } from "./utils";
-import { SpotifyPreview, TwitterPreview, DiscordPreview, WalletPreview } from "./DataPreview";
+import { SpotifyPreview, TwitterPreview, DiscordPreview, WalletPreview, LinkedInPreview, EthosPreview } from "./DataPreview";
 import { InfoMessages } from "./InfoMessages";
 import { useAuthHandlers, useCredentialIssuance } from "./hooks";
 import type { SpotifyUserData } from "./types";
@@ -39,7 +39,7 @@ export function IssuanceModal() {
     });
   };
 
-  const { handleAuth, isSpotifyLogin, isTwitterLogin, isDiscordLogin, isWalletLogin, isAirKitLogin, spotify, twitter, discord } =
+  const { handleAuth, isSpotifyLogin, isTwitterLogin, isDiscordLogin, isLinkedInLogin, isWalletLogin, isAirKitLogin, spotify, twitter, discord, linkedin } =
     useAuthHandlers({
       accessToken,
       setAccessToken,
@@ -264,9 +264,11 @@ export function IssuanceModal() {
               isSpotifyLogin={isSpotifyLogin}
               isTwitterLogin={isTwitterLogin}
               isDiscordLogin={isDiscordLogin}
+              isLinkedInLogin={isLinkedInLogin}
               spotifyAuthenticated={spotify.isAuthenticated}
               twitterAuthenticated={twitter.isAuthenticated}
               discordAuthenticated={discord.isAuthenticated}
+              linkedinAuthenticated={linkedin.isAuthenticated}
               hasAccessToken={!!accessToken}
             />
           )}
@@ -291,6 +293,15 @@ export function IssuanceModal() {
                 ) : isDiscordLogin ? (
                   <DiscordPreview
                     credentialData={transformForCredential(response as Record<string, unknown>)}
+                  />
+                ) : isLinkedInLogin ? (
+                  <LinkedInPreview
+                    credentialData={transformForCredential(response as Record<string, unknown>)}
+                  />
+                ) : isWalletLogin || isAirKitLogin ? (
+                  <EthosPreview
+                    credentialData={transformForCredential(response as Record<string, unknown>)}
+                    isTestAddress={Boolean((response as Record<string, unknown>).is_test_address)}
                   />
                 ) : (
                   <WalletPreview response={response as Record<string, unknown>} />

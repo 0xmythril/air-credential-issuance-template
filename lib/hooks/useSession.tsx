@@ -2,7 +2,7 @@ import { cookieStorage } from "wagmi";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-export type SessionType = "spotify" | "twitter" | "discord" | "wallet" | "airkit";
+export type SessionType = "spotify" | "twitter" | "discord" | "linkedin" | "wallet" | "airkit";
 
 interface SessionData {
   accessToken: string | null;
@@ -28,6 +28,7 @@ export const useSession = create<MultiSessionStore>()(
         spotify: { accessToken: null },
         twitter: { accessToken: null },
         discord: { accessToken: null },
+        linkedin: { accessToken: null },
         wallet: { accessToken: null },
         airkit: { accessToken: null },
       },
@@ -48,7 +49,7 @@ export const useSession = create<MultiSessionStore>()(
           },
         })),
       
-      getSession: (type: SessionType) => get().sessions[type],
+      getSession: (type: SessionType) => get().sessions[type] || { accessToken: null },
       
       // Legacy compatibility - uses wallet session by default
       accessToken: null,

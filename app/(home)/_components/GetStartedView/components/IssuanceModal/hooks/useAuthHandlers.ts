@@ -2,6 +2,7 @@ import { useAuthMethod } from "@/lib/contexts/AuthMethodContext";
 import { useSpotify } from "@/lib/hooks/useSpotify";
 import { useTwitter } from "@/lib/hooks/useTwitter";
 import { useDiscord } from "@/lib/hooks/useDiscord";
+import { useLinkedIn } from "@/lib/hooks/useLinkedIn";
 import { useSession, SessionType } from "@/lib/hooks/useSession";
 import { useConnectModal } from "@rainbow-me/rainbowkit";
 import { useAccount } from "wagmi";
@@ -66,6 +67,21 @@ function useSafeDiscord() {
   }
 }
 
+function useSafeLinkedIn() {
+  try {
+    return useLinkedIn();
+  } catch {
+    return { 
+      isAuthenticated: false, 
+      user: null, 
+      signIn: () => {}, 
+      signOut: () => {},
+      getCurrentUser: async () => null,
+      accessToken: null 
+    };
+  }
+}
+
 export const useAuthHandlers = ({
   accessToken,
   setAccessToken,
@@ -77,12 +93,14 @@ export const useAuthHandlers = ({
   const spotify = useSafeSpotify();
   const twitter = useSafeTwitter();
   const discord = useSafeDiscord();
+  const linkedin = useSafeLinkedIn();
   const { openConnectModal } = useConnectModal();
 
   const isWalletLogin = authMethod === "wallet";
   const isSpotifyLogin = authMethod === "spotify";
   const isTwitterLogin = authMethod === "twitter";
   const isDiscordLogin = authMethod === "discord";
+  const isLinkedInLogin = authMethod === "linkedin";
   const isAirKitLogin = authMethod === "airkit";
 
   const handleSpotifyAuth = async (): Promise<boolean> => {
@@ -398,6 +416,107 @@ export const useAuthHandlers = ({
     return true;
   };
 
+  const handleLinkedInAuth = async (): Promise<boolean> => {
+    console.log("💼 [LinkedIn Auth] Starting LinkedIn authentication flow");
+    console.log("💼 [LinkedIn Auth] isAuthenticated:", linkedin.isAuthenticated);
+    console.log("💼 [LinkedIn Auth] Current accessToken:", accessToken ? "exists" : "null");
+    
+    if (!linkedin.isAuthenticated) {
+      console.log("💼 [LinkedIn Auth] User not authenticated, initiating sign-in");
+      linkedin.signIn();
+      return false; // Indicate redirect happened
+    }
+
+    if (!accessToken) {
+      console.log("💼 [LinkedIn Auth] No internal access token, fetching LinkedIn user data");
+      let linkedinUser;
+      try {
+        linkedinUser = await linkedin.getCurrentUser();
+        console.log("💼 [LinkedIn Auth] Successfully retrieved LinkedIn user:", linkedinUser);
+      } catch (error) {
+        // Token expired or invalid - clear session and prompt re-auth
+        console.error("💼 [LinkedIn Auth] ❌ Error fetching current user:", error);
+        
+        // Check both error message and error object structure
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const errorString = JSON.stringify(error);
+        
+        console.log("💼 [LinkedIn Auth] Error message:", errorMessage);
+        console.log("💼 [LinkedIn Auth] Error string:", errorString);
+        
+        // Check if it's a token expiry error
+        const isTokenError = 
+          errorMessage.toLowerCase().includes("expired") ||
+          errorMessage.toLowerCase().includes("invalid") ||
+          errorMessage.toLowerCase().includes("401") ||
+          errorMessage.toLowerCase().includes("token") ||
+          errorString.toLowerCase().includes("expired");
+        
+        console.log("💼 [LinkedIn Auth] Is token error?", isTokenError);
+        
+        if (isTokenError) {
+          console.log("💼 [LinkedIn Auth] 🔄 Clearing expired LinkedIn session");
+          sessionStore.clearSession("linkedin");
+          linkedin.signOut();
+          throw new Error("LinkedIn session expired. Please sign in again.");
+        }
+        throw error;
+      }
+
+      if (!linkedinUser) {
+        console.error("💼 [LinkedIn Auth] ❌ No user data returned");
+        throw new Error("Failed to get LinkedIn user");
+      }
+
+      console.log("💼 [LinkedIn Auth] Creating internal access token via /api/auth/linkedin");
+      const verifyRes = await fetch("/api/auth/linkedin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          linkedinId: linkedinUser.id,
+          name: linkedinUser.name,
+          email: linkedinUser.email,
+          linkedinAccessToken: linkedin.accessToken,
+        }),
+      });
+
+      const data = (await verifyRes.json()) as {
+        accessToken: string;
+        linkedinId: string;
+      };
+
+      if (!data.accessToken) {
+        console.error("💼 [LinkedIn Auth] ❌ No access token in response");
+        throw new Error("Invalid LinkedIn login");
+      }
+      
+      console.log("💼 [LinkedIn Auth] ✅ Received internal access token:", data.accessToken.substring(0, 20) + "...");
+      setAccessToken(data.accessToken);
+
+      // Verify the token was set in the store
+      console.log("💼 [LinkedIn Auth] 🔍 Verifying token in store...");
+      const verifySession = sessionStore.getSession("linkedin");
+      console.log("💼 [LinkedIn Auth] Token in store:", !!verifySession.accessToken);
+
+      // Wait for state to update and propagate
+      console.log("💼 [LinkedIn Auth] ⏱️ Waiting for state sync...");
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      console.log("💼 [LinkedIn Auth] 🔄 Refetching user data...");
+      const result = await refetch();
+      console.log("💼 [LinkedIn Auth] Refetch result:", result);
+      if (!result.data) {
+        console.error("💼 [LinkedIn Auth] ❌ No data after refetch");
+        throw new Error("Failed to fetch user data after LinkedIn authentication");
+      }
+      console.log("💼 [LinkedIn Auth] ✅ User data fetched successfully:", result.data);
+    }
+    console.log("💼 [LinkedIn Auth] ✅ LinkedIn authentication complete");
+    return true;
+  };
+
   const handleWalletAuth = (): boolean => {
     if (!accessToken || !isConnected) {
       openConnectModal?.();
@@ -413,6 +532,8 @@ export const useAuthHandlers = ({
       return handleTwitterAuth();
     } else if (isDiscordLogin) {
       return handleDiscordAuth();
+    } else if (isLinkedInLogin) {
+      return handleLinkedInAuth();
     } else if (isWalletLogin) {
       return handleWalletAuth();
     }
@@ -424,10 +545,12 @@ export const useAuthHandlers = ({
     isSpotifyLogin,
     isTwitterLogin,
     isDiscordLogin,
+    isLinkedInLogin,
     isWalletLogin,
     isAirKitLogin,
     spotify,
     twitter,
     discord,
+    linkedin,
   };
 };

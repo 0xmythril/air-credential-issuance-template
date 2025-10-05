@@ -16,6 +16,7 @@ const getAuthMethodFromPath = (): SessionType => {
   if (firstSegment === 'spotify') return 'spotify';
   if (firstSegment === 'twitter') return 'twitter';
   if (firstSegment === 'discord') return 'discord';
+  if (firstSegment === 'linkedin') return 'linkedin';
   if (firstSegment === 'ethos' || firstSegment === 'wallet') return 'wallet';
   if (firstSegment === 'airkit') return 'airkit';
   

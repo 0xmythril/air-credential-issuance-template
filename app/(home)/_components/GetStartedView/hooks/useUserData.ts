@@ -16,7 +16,7 @@ export const useUserData = () => {
   const { authMethod } = useAuthMethod();
   const sessionStore = useSession();
   const currentSession = sessionStore.getSession(authMethod);
-  const accessToken = currentSession.accessToken;
+  const accessToken = currentSession?.accessToken || null;
 
   return useQuery({
     queryKey: ["user-data", authMethod, accessToken],
