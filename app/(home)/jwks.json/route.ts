@@ -1,6 +1,5 @@
 import { env } from "@/lib/env";
 import { withPrivateKeyHeaders } from "@/lib/utils/jwt";
-import { createPublicKey, createPrivateKey } from "crypto";
 import * as jose from "jose";
 import { NextResponse } from "next/server";
 
@@ -8,24 +7,25 @@ export const revalidate = 86400; // 24 hours
 
 export async function GET() {
   try {
-    const privateKeyPem = withPrivateKeyHeaders(env.PARTNER_PRIVATE_KEY);
+    if (!env.PARTNER_PRIVATE_KEY) {
+      throw new Error("Missing PARTNER_PRIVATE_KEY env variable");
+    }
 
-    // Import private key using Node crypto so we can derive the public key
-    const privateKey = createPrivateKey({
-      key: privateKeyPem,
-      format: "pem",
-      type: "pkcs8",
-    });
+    const privateKey = await jose.importPKCS8(
+      withPrivateKeyHeaders(env.PARTNER_PRIVATE_KEY),
+      env.SIGNING_ALGORITHM,
+      { extractable: true }
+    );
 
-    const publicKey = createPublicKey(privateKey);
+    const jwk = await jose.exportJWK(privateKey);
 
-    // Export the public JWK (no private components)
-    const jwk = await jose.exportJWK(publicKey);
+    // Remove private key material if present
+    const { d, dp, dq, qi, p, q, ...publicJwk } = jwk;
 
     const jwks = {
       keys: [
         {
-          ...jwk,
+          ...publicJwk,
           use: "sig",
           alg: env.SIGNING_ALGORITHM,
           kid: process.env.NEXT_PUBLIC_PARTNER_ID,
